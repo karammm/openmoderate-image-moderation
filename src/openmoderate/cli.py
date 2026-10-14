@@ -242,6 +242,42 @@ def cmd_download(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_serve(args: argparse.Namespace) -> int:
+    import os
+
+    try:
+        import uvicorn
+    except ImportError:
+        raise SystemExit(
+            "`serve` needs extra dependencies: pip install 'openmoderate[server]'"
+        ) from None
+
+    # The app reads its settings from the environment so multi-worker mode works too.
+    for env, value in (
+        ("OPENMODERATE_CONFIG", args.config),
+        ("OPENMODERATE_HEAD", args.head),
+        ("OPENMODERATE_DEVICE", args.device),
+    ):
+        if value:
+            os.environ[env] = value
+    if args.allow_urls:
+        os.environ["OPENMODERATE_ALLOW_URLS"] = "true"
+    if args.host not in ("127.0.0.1", "localhost") and not os.getenv("OPENMODERATE_API_KEY"):
+        print(
+            f"warning: serving on {args.host} without OPENMODERATE_API_KEY; anyone who can "
+            "reach this port can use the API.",
+            file=sys.stderr,
+        )
+    uvicorn.run(
+        "openmoderate.server.app:app",
+        host=args.host,
+        port=args.port,
+        workers=args.workers,
+        log_level=args.log_level,
+    )
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="openmoderate", description="Open-source image content moderation."
@@ -286,6 +322,17 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("download", help="Pre-download model weights (for offline/Docker use)")
     p.add_argument("--config")
     p.set_defaults(func=cmd_download)
+
+    p = sub.add_parser("serve", help="Run the REST API server")
+    p.add_argument("--host", default="127.0.0.1", help="Bind address (0.0.0.0 for all)")
+    p.add_argument("--port", type=int, default=8000)
+    p.add_argument("--workers", type=int, default=1, help="Processes (each loads the model)")
+    p.add_argument("--config", help="Policy YAML file")
+    p.add_argument("--head", help="Trained head (.omh)")
+    p.add_argument("--device", help="auto, cpu, cuda or mps")
+    p.add_argument("--allow-urls", action="store_true", help="Allow {'url': ...} requests")
+    p.add_argument("--log-level", default="info")
+    p.set_defaults(func=cmd_serve)
     return parser
 
 

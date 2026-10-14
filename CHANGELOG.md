@@ -4,6 +4,21 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-14
+
+### Added
+- REST API server (`pip install "openmoderate[server]"`, `openmoderate serve`), built on FastAPI:
+  `GET /health`, `GET /v1/categories`, `POST /v1/moderate` (multipart), `POST /v1/moderate/batch`
+  (multipart, per-file errors) and `POST /v1/moderate/json` (base64 or URL).
+- Optional API-key authentication via `OPENMODERATE_API_KEY` (constant-time comparison).
+- URL fetching, off by default (`OPENMODERATE_ALLOW_URLS`), with SSRF protection: http(s) only,
+  no private, loopback or link-local addresses, every redirect re-validated, size and time limits.
+- Upload size and batch limits, model preloading at startup, and a warning when serving on a public
+  interface without an API key.
+- Dockerfile (CPU torch, non-root user, model weights baked in, healthcheck) and a CI job that
+  builds and smoke-tests the image.
+- CI also runs on `release/**` branches.
+
 ## [0.2.0] - 2026-10-14
 
 ### Added

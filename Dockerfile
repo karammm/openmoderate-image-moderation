@@ -4,7 +4,7 @@
 #   docker run -p 8000:8000 -e OPENMODERATE_API_KEY=change-me openmoderate
 #
 # Model weights are downloaded at build time, so containers start fast and run offline.
-FROM python:3.11-slim
+FROM python:3.14-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \

@@ -1,6 +1,6 @@
 # openmoderate
 
-**Open-source, self-hosted image content moderation for Python.** Detect nudity, sexual content, violence, gore, weapons, hate symbols, drugs, self-harm, alcohol and tobacco in uploaded images — with one `pip install`, no cloud account, no per-image fees, and no ML experience needed.
+**Open-source, self-hosted image and video content moderation for Python.** Detect nudity, sexual content, violence, gore, weapons, hate symbols, drugs, self-harm, alcohol and tobacco in uploaded images and videos — with one `pip install`, no cloud account, no per-image fees, and no ML experience needed.
 
 Think of it as an open alternative to Amazon Rekognition's `DetectModerationLabels` that runs inside your own app.
 
@@ -21,7 +21,7 @@ if not result.is_safe:
 
 ![How openmoderate works: upload, normalize, embed with CLIP, compare against category and safe prompts, score, and decide with your thresholds. Use it as a Python library, a CLI or a REST API. Detects 11 categories out of the box, plus your own.](docs/assets/how-it-works.svg)
 
-> **Status: alpha (v0.4).** The Python API, the `openmoderate` CLI, training on your own data, the REST API server and drop-in protection for FastAPI, Flask and Django are usable today. Video is coming next — see the [roadmap](#roadmap).
+> **Status: alpha (v0.5).** Images and videos; Python API, `openmoderate` CLI, training on your own data, REST API server and drop-in protection for FastAPI, Flask and Django. Next: the stable v1.0 — see the [roadmap](#roadmap).
 
 ## Install
 
@@ -113,6 +113,8 @@ custom_categories:
 mod = Moderator("policy.yaml")
 ```
 
+Images and video frames have letterbox bars and uniform padding trimmed before scoring, because borders change what the model sees (on a test video, black bars pushed a pistol frame's `sexual_activity` score from 0.01 to 0.65). Set `trim_borders: false` in the policy YAML to turn this off.
+
 `negatives` are category-specific contrast prompts: things that look similar but should not count for *this* category (for example, the built-in `drugs` category treats cigarettes as a negative, because they belong to `tobacco`).
 
 ### Configuration via environment
@@ -181,6 +183,43 @@ openmoderate evaluate ./holdout                 # measure the zero-shot defaults
 > **The `safe/` folder matters most.** The head learns what is *not* a violation from it. In our tests, a `dog` head trained with only cats and city photos in `safe/` scored 100% on held-out validation, yet flagged 6 of 20 unrelated photos (people, a meeting, a boxing match) as dogs. After adding 24 varied everyday photos to `safe/`, it flagged none. Fill `safe/` with a broad, representative sample of the images your users actually upload, and evaluate on images from outside the training set.
 
 Heads are saved as `.omh` files: a NumPy archive with no pickle, so loading a head from someone else cannot run code.
+
+## Videos
+
+```bash
+pip install "openmoderate[video]"
+```
+
+```python
+result = Moderator().analyze_video("clip.mp4")      # path, bytes or file object
+result.is_safe        # False
+result.segments       # [VideoSegment(name='weapons', start=3.0, end=6.0, max_confidence=0.9949, frames=3)]
+```
+
+```bash
+$ openmoderate scan ./media          # images and videos, recursively
+FLAGGED  media/slideshow.mp4  [video 15.0s, 15 frames]
+           0:03.0-0:06.0  weapons 99%
+           0:09.0-0:12.0  violence 99%
+```
+
+openmoderate samples frames (1 per second by default), scores them in batches and merges consecutive flagged frames into timestamped segments. A single missed sample inside a segment doesn't split it.
+
+| Option | Default | Purpose |
+|---|---|---|
+| `fps` | `1.0` | Frames sampled per second. Raise it to catch brief content, lower it for speed. |
+| `min_frames` | `1` | Ignore segments shorter than N sampled frames (suppresses one-frame false positives). |
+| `stop_on_violation` | `False` | Stop at the first violation: fast rejection for upload flows. |
+| `max_duration` | none | Only analyse the first N seconds; `result.truncated` tells you if it stopped early. |
+| `keep_frame_scores` | `False` | Include every sampled frame's scores in the result. |
+
+The same options exist on the CLI (`--fps`, `--min-frames`, `--max-duration`) and on the REST endpoint `POST /v1/moderate/video` (multipart field `file`; query parameters `fps`, `min_frames`, `stop_on_violation`).
+
+Things to know:
+
+- **Content between samples is not seen.** At 1 fps, a half-second flash can be missed. Use a higher `fps` when that matters.
+- **Video decoding runs FFmpeg (via OpenCV) on untrusted input.** openmoderate caps frame size, decoded frames and duration while decoding, rather than trusting the file's metadata. The server rejects videos over `OPENMODERATE_MAX_VIDEO_SECONDS` (default 600) or `OPENMODERATE_MAX_VIDEO_BYTES` (default 200 MB) with `413`, instead of returning a partially checked result. For hostile traffic, also run the server in a sandboxed container.
+- The framework integrations (FastAPI, Flask, Django) moderate images; a video upload counts as "not an image" there. Call `analyze_video()` from your view for video uploads.
 
 ## Protect uploads in your web app
 
@@ -290,6 +329,7 @@ Interactive API docs are served at `http://localhost:8000/docs`.
 | `POST /v1/moderate` | multipart field `file` | one result |
 | `POST /v1/moderate/batch` | multipart field `files` (repeat it) | `{"results": [...]}`; unreadable files get an `error` entry |
 | `POST /v1/moderate/json` | `{"image_base64": "..."}` or `{"url": "..."}` | one result |
+| `POST /v1/moderate/video` | multipart field `file`; query `fps`, `min_frames`, `stop_on_violation` | timestamped `segments` |
 
 ```bash
 curl -H "X-API-Key: change-me" -F file=@upload.jpg http://localhost:8000/v1/moderate
@@ -323,6 +363,7 @@ Server settings (environment variables):
 | `OPENMODERATE_CONFIG` / `OPENMODERATE_HEAD` | unset | Policy YAML and trained head to load (also `--config` / `--head`) |
 | `OPENMODERATE_MAX_BATCH` | `16` | Max files per batch request |
 | `OPENMODERATE_MAX_BYTES` | 25 MB | Max size per image |
+| `OPENMODERATE_MAX_VIDEO_BYTES` / `OPENMODERATE_MAX_VIDEO_SECONDS` | 200 MB / 600 s | Video upload limits |
 | `OPENMODERATE_PRELOAD` | `true` | Load the model at startup rather than on the first request |
 
 **URL fetching is off by default.** A server that downloads any URL it is given can be tricked into reaching internal services (cloud metadata endpoints, admin panels). When you enable it, openmoderate only allows http(s), refuses private, loopback and link-local addresses, and re-checks every redirect. If untrusted callers can use the API, also route outbound traffic through an egress proxy.
@@ -348,7 +389,7 @@ Be honest with yourself about what zero-shot moderation can do:
 | **v0.2** | `openmoderate` CLI (`scan`, `train`, `evaluate`) + training on your own data ✅ |
 | **v0.3** | REST API server (`openmoderate serve`) + Docker image ✅ |
 | **v0.4** | Drop-in upload protection for FastAPI, Flask and Django ✅ |
-| v0.5 | Video moderation (frame sampling, timestamped violations) |
+| **v0.5** | Video moderation (frame sampling, timestamped segments) ✅ |
 | v1.0 | Stable API, docs site, public benchmarks |
 
 ## Contributing

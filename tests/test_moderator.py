@@ -110,3 +110,29 @@ def test_category_negatives_suppress_lookalikes():
     cat_with_neg = {**cat, "negatives": ["a competitor logo"]}
     suppressed = Moderator({**base, "custom_categories": [cat_with_neg]}, engine=engine)
     assert suppressed.analyze(solid((9, 9, 9))).is_safe
+
+
+def test_trim_borders_crops_letterbox_only():
+    from PIL import Image
+
+    from openmoderate.io import trim_borders
+
+    content = solid((200, 60, 60), size=(100, 50))
+    boxed = Image.new("RGB", (100, 80), (0, 0, 0))
+    boxed.paste(content, (0, 15))
+    assert trim_borders(boxed).size == (100, 50)
+    assert trim_borders(content).size == (100, 50)  # nothing to trim
+    tiny = Image.new("RGB", (100, 100), (0, 0, 0))
+    tiny.paste(solid((255, 255, 255), size=(10, 10)), (45, 45))
+    assert trim_borders(tiny).size == (100, 100)  # content < 20% of frame: left alone
+
+
+def test_letterboxed_image_scores_like_original(fake_engine):
+    from PIL import Image
+
+    gun = solid((255, 0, 0), size=(60, 40))
+    boxed = Image.new("RGB", (60, 60), (0, 0, 0))
+    boxed.paste(gun, (0, 10))
+    assert not Moderator(engine=fake_engine).analyze(boxed).is_safe
+    untrimmed = Moderator({"trim_borders": False}, engine=fake_engine)
+    assert untrimmed.analyze(boxed).is_safe  # the fake engine only recognises exact colours

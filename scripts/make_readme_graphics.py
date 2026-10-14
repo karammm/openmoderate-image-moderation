@@ -18,7 +18,7 @@ ROADMAP = [
     ("v0.2", "CLI + training", True),
     ("v0.3", "REST API + Docker", True),
     ("v0.4", "Framework middleware", True),
-    ("v0.5", "Video", False),
+    ("v0.5", "Video", True),
     ("v1.0", "Stable release", False),
 ]
 
@@ -104,13 +104,14 @@ def infographic() -> str:
         arrow_defs(),
         f'<rect width="{W}" height="{H}" rx="16" style="fill: var(--bg)"/>',
         f'<text x="{L}" y="64"><tspan font-size="36" font-weight="700">openmoderate</tspan>'
-        '<tspan dx="16" font-size="20" class="muted">open-source image moderation for Python'
+        '<tspan dx="16" font-size="20" class="muted">'
+        "open-source image &amp; video moderation for Python"
         "</tspan></text>",
         t(
             L,
             98,
-            "Detect nudity, violence, weapons, hate symbols, drugs and more in uploaded "
-            "images. Runs on your own servers: no cloud account, no per-image fees.",
+            "Detect nudity, violence, weapons, hate symbols, drugs and more in "
+            "images and videos. Runs on your servers: no cloud account, no per-image fees.",
             16,
             cls="muted",
         ),

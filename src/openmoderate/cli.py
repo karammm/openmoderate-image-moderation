@@ -13,6 +13,7 @@ import argparse
 import json
 import sys
 from collections.abc import Sequence
+from pathlib import Path
 
 from openmoderate import __version__
 
@@ -57,19 +58,38 @@ def _build_moderator(args: argparse.Namespace):
 
 def cmd_scan(args: argparse.Namespace) -> int:
     from openmoderate.io import ImageLoadError, iter_image_files
+    from openmoderate.video import is_video_path
 
     sources: list[str] = []
+    videos: list[str] = []
     for target in args.paths:
         if target.startswith(("http://", "https://")):
             sources.append(target)
-        else:
-            files = iter_image_files(target)
-            if not files:
-                print(f"warning: no images found at {target}", file=sys.stderr)
-            sources.extend(str(f) for f in files)
+            continue
+        path = Path(target)
+        if path.is_file():
+            (videos if is_video_path(path) else sources).append(str(path))
+            continue
+        found_images = [str(f) for f in iter_image_files(path)]
+        found_videos = sorted(str(f) for f in path.rglob("*") if is_video_path(f))
+        if not found_images and not found_videos:
+            print(f"warning: no images or videos found at {target}", file=sys.stderr)
+        sources.extend(found_images)
+        videos.extend(found_videos)
 
     mod = _build_moderator(args)
     flagged = errors = 0
+    for video in videos:
+        try:
+            res = mod.analyze_video(
+                video, fps=args.fps, max_duration=args.max_duration, min_frames=args.min_frames
+            )
+        except (ImportError, ValueError) as exc:
+            errors += 1
+            _emit_error(args, video, exc)
+            continue
+        flagged += not res.is_safe
+        _emit_video_result(args, res)
     for i in range(0, len(sources), args.batch_size):
         chunk = sources[i : i + args.batch_size]
         try:
@@ -88,7 +108,7 @@ def cmd_scan(args: argparse.Namespace) -> int:
             _emit_result(args, res)
 
     if not args.json:
-        total = len(sources)
+        total = len(sources) + len(videos)
         print(f"\n{total} scanned, {flagged} flagged, {errors} unreadable", file=sys.stderr)
     if args.fail_on_violation and flagged:
         return 1
@@ -102,6 +122,26 @@ def _emit_result(args: argparse.Namespace, res) -> None:
     verdict = "SAFE   " if res.is_safe else "FLAGGED"
     details = ", ".join(f"{v.name} {v.confidence:.0%}" for v in res.violations)
     print(f"{verdict}  {res.source}  {details}".rstrip())
+
+
+def _emit_video_result(args: argparse.Namespace, res) -> None:
+    if args.json:
+        print(json.dumps(res.to_dict()))
+        return
+    verdict = "SAFE   " if res.is_safe else "FLAGGED"
+    note = " (truncated)" if res.truncated else ""
+    print(
+        f"{verdict}  {res.source}  [video {res.duration:.1f}s, {res.frames_analyzed} frames]{note}"
+    )
+    for seg in res.segments:
+        print(
+            f"           {_clock(seg.start)}-{_clock(seg.end)}  {seg.name} {seg.max_confidence:.0%}"
+        )
+
+
+def _clock(seconds: float) -> str:
+    minutes, secs = divmod(seconds, 60)
+    return f"{int(minutes)}:{secs:04.1f}"
 
 
 def _emit_error(args: argparse.Namespace, src: str, exc: Exception) -> None:
@@ -133,7 +173,7 @@ def cmd_train(args: argparse.Namespace) -> int:
         )
 
     engine = ClipEngine(cfg.model_name, cfg.pretrained, device=args.device, cache_dir=cfg.cache_dir)
-    embeddings = dataset.embed(engine, verbose=True)
+    embeddings = dataset.embed(engine, verbose=True, trim=cfg.trim_borders)
     parents = {c.name: c.parent for c in cfg.categories if c.name in dataset.labels}
     report = train_head(
         embeddings,
@@ -188,7 +228,7 @@ def cmd_evaluate(args: argparse.Namespace) -> int:
     if not labels:
         raise SystemExit("No dataset label matches a moderator category; nothing to evaluate.")
 
-    embeddings = dataset.embed(mod.engine, verbose=not args.json)
+    embeddings = dataset.embed(mod.engine, verbose=not args.json, trim=mod.config.trim_borders)
     scores = mod.score_all(embeddings)
     cols = [names.index(label) for label in labels]
     targets = dataset.targets[:, [dataset.labels.index(label) for label in labels]]
@@ -292,6 +332,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--fail-on-violation", action="store_true", help="Exit with code 1 if anything is flagged"
     )
     p.add_argument("--batch-size", type=int, default=16)
+    p.add_argument("--fps", type=float, default=1.0, help="Video frames sampled per second")
+    p.add_argument("--max-duration", type=float, help="Only analyse the first N seconds of videos")
+    p.add_argument(
+        "--min-frames", type=int, default=1, help="Ignore video segments shorter than N frames"
+    )
     _add_policy_args(p)
     p.set_defaults(func=cmd_scan)
 

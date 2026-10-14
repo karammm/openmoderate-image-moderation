@@ -16,7 +16,7 @@ from pathlib import Path
 import numpy as np
 
 from openmoderate.engine.base import Engine
-from openmoderate.io import IMAGE_EXTENSIONS, load_image
+from openmoderate.io import IMAGE_EXTENSIONS, load_image, trim_borders
 
 DEFAULT_SAFE_LABEL = "safe"
 
@@ -67,11 +67,23 @@ class FolderDataset:
         counts["(no label)"] = int((self.targets.sum(axis=1) == 0).sum())
         return counts
 
-    def embed(self, engine: Engine, batch_size: int = 32, verbose: bool = False) -> np.ndarray:
-        """Encode every image with ``engine``. Unreadable images raise immediately."""
+    def embed(
+        self,
+        engine: Engine,
+        batch_size: int = 32,
+        verbose: bool = False,
+        trim: bool = True,
+    ) -> np.ndarray:
+        """Encode every image with ``engine``. Unreadable images raise immediately.
+
+        ``trim`` must match the moderator's ``trim_borders`` setting so a head is trained on
+        the same view of the images it will score.
+        """
         out = []
         for i in range(0, len(self.paths), batch_size):
             batch = [load_image(p) for p in self.paths[i : i + batch_size]]
+            if trim:
+                batch = [trim_borders(im) for im in batch]
             out.append(engine.encode_images(batch))
             if verbose:
                 done = min(i + batch_size, len(self.paths))

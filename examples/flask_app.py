@@ -1,8 +1,8 @@
 """Flask app that rejects violating uploads.
 
-    pip install "openmoderate[flask]"
-    flask --app examples/flask_app.py run
-    curl -F avatar=@photo.jpg localhost:5000/avatar
+pip install "openmoderate[flask]"
+flask --app examples/flask_app.py run
+curl -F avatar=@photo.jpg localhost:5000/avatar
 """
 
 from pathlib import Path

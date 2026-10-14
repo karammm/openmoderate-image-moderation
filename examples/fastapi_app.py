@@ -1,8 +1,8 @@
 """FastAPI app that rejects violating uploads.
 
-    pip install "openmoderate[fastapi]" uvicorn
-    uvicorn examples.fastapi_app:app
-    curl -F file=@photo.jpg localhost:8000/avatar
+pip install "openmoderate[fastapi]" uvicorn
+uvicorn examples.fastapi_app:app
+curl -F file=@photo.jpg localhost:8000/avatar
 """
 
 from pathlib import Path

@@ -29,6 +29,8 @@ class ModerationConfig:
     logit_scale: float = 100.0
     margin_bias: float = 2.5
     margin_temperature: float = 1.5
+    # Crop letterbox bars and uniform padding before scoring (see io.trim_borders).
+    trim_borders: bool = True
 
     def with_overrides(
         self,
@@ -67,6 +69,8 @@ class ModerationConfig:
             cfg.pretrained = data["pretrained"]
         if "cache_dir" in data:
             cfg.cache_dir = data["cache_dir"]
+        if "trim_borders" in data:
+            cfg.trim_borders = bool(data["trim_borders"])
         if "safe_prompts" in data:
             cfg.safe_prompts = tuple(data["safe_prompts"])
         if "custom_categories" in data:

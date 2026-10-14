@@ -106,3 +106,37 @@ def shared_fake(fake_engine):
     configure(Moderator(engine=fake_engine))
     yield fake_engine
     configure()
+
+
+class NearestColorEngine(FakeEngine):
+    """Like FakeEngine, but matches an image's mean colour to the nearest registered colour.
+
+    Lossy video codecs shift colours slightly, so exact pixel lookup would miss.
+    """
+
+    def encode_images(self, images):
+        out = []
+        for im in images:
+            mean = np.asarray(im, dtype=float).reshape(-1, 3).mean(axis=0)
+            best, best_dist = "unrelated image", 60.0
+            for color, prompt in self.color_to_prompt.items():
+                dist = float(np.linalg.norm(mean - np.array(color)))
+                if dist < best_dist:
+                    best, best_dist = prompt, dist
+            out.append(_vec(best))
+        return np.stack(out)
+
+
+RED_GUN = {(255, 0, 0): "a photo of a gun", (0, 255, 0): "a photo of a landscape or nature scene"}
+
+
+def make_video(path, segments, fps=10, size=(64, 48)):
+    """Write a video made of solid-colour stretches: segments = [((r, g, b), seconds), ...]."""
+    cv2 = pytest.importorskip("cv2")
+    writer = cv2.VideoWriter(str(path), cv2.VideoWriter_fourcc(*"mp4v"), fps, size)
+    for (r, g, b), seconds in segments:
+        frame = np.full((size[1], size[0], 3), (b, g, r), np.uint8)  # OpenCV is BGR
+        for _ in range(round(seconds * fps)):
+            writer.write(frame)
+    writer.release()
+    return path

@@ -17,7 +17,12 @@ All notable changes to this project are documented here. The format follows [Kee
   interface without an API key.
 - Dockerfile (CPU torch, non-root user, model weights baked in, healthcheck) and a CI job that
   builds and smoke-tests the image.
-- CI also runs on `release/**` branches.
+- CI also runs on `release/**` branches, checks that the model stack imports, and reports
+  failures as annotations.
+
+### Fixed
+- Docker image and CI now install `torch` and `torchvision` from the same CPU index (a mismatch
+  broke `import open_clip`).
 
 ## [0.2.0] - 2026-10-14
 

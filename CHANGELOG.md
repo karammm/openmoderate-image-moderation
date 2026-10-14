@@ -4,6 +4,9 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+### Added
+- Python 3.13 and 3.14 are tested in CI and listed as supported.
+
 ## [1.0.1] - 2026-10-14
 
 First release on PyPI: `pip install openmoderate`.

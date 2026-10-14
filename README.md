@@ -21,7 +21,7 @@ if not result.is_safe:
 
 ![How openmoderate works: upload, normalize, embed with CLIP, compare against category and safe prompts, score, and decide with your thresholds. Use it as a Python library, a CLI or a REST API. Detects 11 categories out of the box, plus your own.](docs/assets/how-it-works.svg)
 
-> **Status: alpha (v0.3).** The Python API, the `openmoderate` CLI, training on your own data and the REST API server are usable today. Framework middleware and video are coming next — see the [roadmap](#roadmap).
+> **Status: alpha (v0.4).** The Python API, the `openmoderate` CLI, training on your own data, the REST API server and drop-in protection for FastAPI, Flask and Django are usable today. Video is coming next — see the [roadmap](#roadmap).
 
 ## Install
 
@@ -182,6 +182,89 @@ openmoderate evaluate ./holdout                 # measure the zero-shot defaults
 
 Heads are saved as `.omh` files: a NumPy archive with no pickle, so loading a head from someone else cannot run code.
 
+## Protect uploads in your web app
+
+Add one line and violating images are rejected before your code runs. The file is rewound after the check, so you can save it as usual. All integrations in a process share one loaded model (~600 MB), even when endpoints use different policies.
+
+### FastAPI
+
+```bash
+pip install "openmoderate[fastapi]"
+```
+
+```python
+from fastapi import FastAPI, UploadFile
+from openmoderate.integrations.fastapi import ModeratedFile, moderated
+
+app = FastAPI()
+
+@app.post("/avatar")
+async def avatar(file: ModeratedFile):        # form field "file"
+    ...                                        # only safe images reach this line
+
+@app.post("/listing")
+async def listing(photo: UploadFile = moderated("photo", thresholds={"weapons": 0.3})):
+    ...                                        # a stricter policy for this endpoint
+```
+
+Use `ModeratedFiles` / `moderated_files("field")` for multi-file fields. Moderation runs in a worker thread, so the event loop isn't blocked. A rejected upload gets `422` with `{"detail": {"error": "image_rejected", "field": "file", "violations": ["weapons"], ...}}`.
+
+### Flask
+
+```bash
+pip install "openmoderate[flask]"
+```
+
+```python
+from openmoderate.integrations.flask import OpenModerate, moderate_uploads
+
+@app.post("/avatar")
+@moderate_uploads("avatar")        # no arguments = every file in the request
+def avatar():
+    request.files["avatar"].save(...)
+
+# Or check every upload on every request:
+OpenModerate(app, check_all_requests=True)
+```
+
+### Django
+
+```bash
+pip install "openmoderate[django]"
+```
+
+```python
+from openmoderate.integrations.django import ModerationValidator
+
+class Profile(models.Model):
+    avatar = models.ImageField(validators=[ModerationValidator()])
+    banner = models.ImageField(validators=[ModerationValidator(thresholds={"suggestive": 0.4})])
+```
+
+The validator works in model forms, the admin and Django REST Framework model serializers, and is safe to use in migrations. Users see "This image was rejected by content moderation (weapons)." To guard whole URL prefixes instead, add the middleware:
+
+```python
+MIDDLEWARE = [..., "openmoderate.integrations.django.ModerationMiddleware"]
+OPENMODERATE = {
+    "PATHS": ["/uploads/", "/api/"],   # default: every path
+    "CONFIG": BASE_DIR / "policy.yaml",
+    "HEAD": BASE_DIR / "my_head.omh",
+}
+```
+
+### Behaviour common to all integrations
+
+| | Explicit (dependency, decorator, validator) | Blanket (Flask extension, Django middleware) |
+|---|---|---|
+| Violating image | rejected, `422` | rejected, `422` |
+| Larger than 25 MB | rejected, `413` | rejected, `413` |
+| Not an image (PDF, CSV…) | rejected (`on_unreadable="reject"`) | passed through (`on_unreadable="allow"`) |
+| Empty file input | skipped (the view decides whether it's required) | skipped |
+
+Error responses list the violated category names but **not the confidence scores**, because exact scores help an attacker tweak an image until it passes. Pass `include_scores=True` if you need them. To share a custom moderator across everything, call `openmoderate.integrations.configure(Moderator(...))` at startup.
+
+Runnable examples: [`examples/fastapi_app.py`](examples/fastapi_app.py), [`examples/flask_app.py`](examples/flask_app.py), [`examples/django_app.py`](examples/django_app.py).
+
 ## REST API server
 
 Use openmoderate from any language over HTTP.
@@ -264,7 +347,7 @@ Be honest with yourself about what zero-shot moderation can do:
 | **v0.1** | Core zero-shot engine + Python API ✅ |
 | **v0.2** | `openmoderate` CLI (`scan`, `train`, `evaluate`) + training on your own data ✅ |
 | **v0.3** | REST API server (`openmoderate serve`) + Docker image ✅ |
-| v0.4 | Drop-in middleware for FastAPI, Flask and Django |
+| **v0.4** | Drop-in upload protection for FastAPI, Flask and Django ✅ |
 | v0.5 | Video moderation (frame sampling, timestamped violations) |
 | v1.0 | Stable API, docs site, public benchmarks |
 

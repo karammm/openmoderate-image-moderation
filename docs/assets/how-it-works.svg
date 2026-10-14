@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="978" viewBox="0 0 1200 978" role="img" aria-labelledby="title desc" xml:space="preserve">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1006" viewBox="0 0 1200 1006" role="img" aria-labelledby="title desc" xml:space="preserve">
 <title id="title">How openmoderate works</title>
 <desc id="desc">openmoderate is an open-source Python library that checks uploaded images for nudity, violence, weapons, hate symbols, drugs and more. It runs a CLIP model locally, compares each image against text descriptions of every category, and returns whether the image is safe. Use it as a Python library, a command-line tool or a REST API.</desc>
 <style>
@@ -30,7 +30,7 @@
   .arrow { stroke: var(--muted); stroke-width: 1.5; fill: none; }
 </style>
 <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill: var(--muted)"/></marker></defs>
-<rect width="1200" height="978" rx="16" style="fill: var(--bg)"/>
+<rect width="1200" height="1006" rx="16" style="fill: var(--bg)"/>
 <text x="48" y="64"><tspan font-size="36" font-weight="700">openmoderate</tspan><tspan dx="16" font-size="20" class="muted">open-source image moderation for Python</tspan></text>
 <text x="48" y="98" font-size="16" class="muted" text-anchor="start">Detect nudity, violence, weapons, hate symbols, drugs and more in uploaded images. Runs on your own servers: no cloud account, no per-image fees.</text>
 <text x="48" y="152" font-size="14" class="label" text-anchor="start">HOW IT WORKS</text>
@@ -92,54 +92,56 @@
 <text x="818.0" y="546" font-size="13" class="mono muted" text-anchor="start">    localhost:8000/v1/moderate</text>
 <text x="818.0" y="568" font-size="13" class="mono" text-anchor="start">{&quot;is_safe&quot;: false, &quot;violations&quot;: …}</text>
 <text x="818.0" y="590" font-size="13" class="mono muted" text-anchor="start">$ docker run -p 8000:8000 openmoderate</text>
-<text x="48" y="668" font-size="14" class="label" text-anchor="start">DETECTS OUT OF THE BOX</text>
-<rect x="48" y="686" width="71.68" height="32" rx="16" style="fill: var(--surface); stroke: var(--border)"/>
-<text x="83.84" y="707" font-size="14" text-anchor="middle">nudity</text>
-<rect x="129.68" y="686" width="137.2" height="32" rx="16" style="fill: var(--surface); stroke: var(--border)"/>
-<text x="198.28" y="707" font-size="14" text-anchor="middle">sexual activity</text>
-<rect x="276.88" y="686" width="100.8" height="32" rx="16" style="fill: var(--surface); stroke: var(--border)"/>
-<text x="327.28" y="707" font-size="14" text-anchor="middle">suggestive</text>
-<rect x="387.68" y="686" width="86.24000000000001" height="32" rx="16" style="fill: var(--surface); stroke: var(--border)"/>
-<text x="430.8" y="707" font-size="14" text-anchor="middle">violence</text>
-<rect x="483.92" y="686" width="57.120000000000005" height="32" rx="16" style="fill: var(--surface); stroke: var(--border)"/>
-<text x="512.48" y="707" font-size="14" text-anchor="middle">gore</text>
-<rect x="551.04" y="686" width="78.96000000000001" height="32" rx="16" style="fill: var(--surface); stroke: var(--border)"/>
-<text x="590.52" y="707" font-size="14" text-anchor="middle">weapons</text>
-<rect x="640.0" y="686" width="115.36" height="32" rx="16" style="fill: var(--surface); stroke: var(--border)"/>
-<text x="697.68" y="707" font-size="14" text-anchor="middle">hate symbols</text>
-<rect x="765.36" y="686" width="64.4" height="32" rx="16" style="fill: var(--surface); stroke: var(--border)"/>
-<text x="797.5600000000001" y="707" font-size="14" text-anchor="middle">drugs</text>
-<rect x="839.76" y="686" width="93.52" height="32" rx="16" style="fill: var(--surface); stroke: var(--border)"/>
-<text x="886.52" y="707" font-size="14" text-anchor="middle">self-harm</text>
-<rect x="943.28" y="686" width="78.96000000000001" height="32" rx="16" style="fill: var(--surface); stroke: var(--border)"/>
-<text x="982.76" y="707" font-size="14" text-anchor="middle">alcohol</text>
-<rect x="1032.24" y="686" width="78.96000000000001" height="32" rx="16" style="fill: var(--surface); stroke: var(--border)"/>
-<text x="1071.72" y="707" font-size="14" text-anchor="middle">tobacco</text>
-<rect x="48" y="730" width="180.88" height="32" rx="16" style="fill: var(--accent-soft); stroke: var(--accent); stroke-dasharray: 4 3"/>
-<text x="138.44" y="751" font-size="14" class="accent" text-anchor="middle">+ your own categories</text>
-<text x="48" y="818" font-size="14" class="label" text-anchor="start">ROADMAP</text>
-<line x1="108.0" y1="858" x2="1092.0" y2="858" style="stroke: var(--border); stroke-width: 3"/>
-<line x1="108.0" y1="858" x2="501.6" y2="858" style="stroke: var(--accent); stroke-width: 3"/>
-<circle cx="108.0" cy="858" r="9" style="fill: var(--accent); stroke: var(--accent)"/>
-<path d="M104.0,858 l3,3 l5,-6" style="stroke: var(--bg); stroke-width: 2; fill: none"/>
-<text x="108.0" y="890" font-size="15" font-weight="650" text-anchor="middle">v0.1</text>
-<text x="108.0" y="910" font-size="13" class="muted" text-anchor="middle">Core engine</text>
-<circle cx="304.8" cy="858" r="9" style="fill: var(--accent); stroke: var(--accent)"/>
-<path d="M300.8,858 l3,3 l5,-6" style="stroke: var(--bg); stroke-width: 2; fill: none"/>
-<text x="304.8" y="890" font-size="15" font-weight="650" text-anchor="middle">v0.2</text>
-<text x="304.8" y="910" font-size="13" class="muted" text-anchor="middle">CLI + training</text>
-<circle cx="501.6" cy="858" r="9" style="fill: var(--accent); stroke: var(--accent)"/>
-<path d="M497.6,858 l3,3 l5,-6" style="stroke: var(--bg); stroke-width: 2; fill: none"/>
-<text x="501.6" y="890" font-size="15" font-weight="650" text-anchor="middle">v0.3</text>
-<text x="501.6" y="910" font-size="13" class="muted" text-anchor="middle">REST API + Docker</text>
-<circle cx="698.4000000000001" cy="858" r="9" style="fill: var(--bg); stroke: var(--border); stroke-width: 2"/>
-<text x="698.4000000000001" y="890" font-size="15" font-weight="650" class="muted" text-anchor="middle">v0.4</text>
-<text x="698.4000000000001" y="910" font-size="13" class="muted" text-anchor="middle">Framework middleware</text>
-<circle cx="895.2" cy="858" r="9" style="fill: var(--bg); stroke: var(--border); stroke-width: 2"/>
-<text x="895.2" y="890" font-size="15" font-weight="650" class="muted" text-anchor="middle">v0.5</text>
-<text x="895.2" y="910" font-size="13" class="muted" text-anchor="middle">Video</text>
-<circle cx="1092.0" cy="858" r="9" style="fill: var(--bg); stroke: var(--border); stroke-width: 2"/>
-<text x="1092.0" y="890" font-size="15" font-weight="650" class="muted" text-anchor="middle">v1.0</text>
-<text x="1092.0" y="910" font-size="13" class="muted" text-anchor="middle">Stable release</text>
-<text x="48" y="954" font-size="13" class="muted" text-anchor="start">Apache-2.0  ·  github.com/karammm/openmoderate-image-moderation</text>
+<text x="48" y="646" font-size="14" class="muted">Plus drop-in upload protection for FastAPI, Flask and Django:  <tspan class="mono" style="fill: var(--text)">file: ModeratedFile</tspan></text>
+<text x="48" y="696" font-size="14" class="label" text-anchor="start">DETECTS OUT OF THE BOX</text>
+<rect x="48" y="714" width="71.68" height="32" rx="16" style="fill: var(--surface); stroke: var(--border)"/>
+<text x="83.84" y="735" font-size="14" text-anchor="middle">nudity</text>
+<rect x="129.68" y="714" width="137.2" height="32" rx="16" style="fill: var(--surface); stroke: var(--border)"/>
+<text x="198.28" y="735" font-size="14" text-anchor="middle">sexual activity</text>
+<rect x="276.88" y="714" width="100.8" height="32" rx="16" style="fill: var(--surface); stroke: var(--border)"/>
+<text x="327.28" y="735" font-size="14" text-anchor="middle">suggestive</text>
+<rect x="387.68" y="714" width="86.24000000000001" height="32" rx="16" style="fill: var(--surface); stroke: var(--border)"/>
+<text x="430.8" y="735" font-size="14" text-anchor="middle">violence</text>
+<rect x="483.92" y="714" width="57.120000000000005" height="32" rx="16" style="fill: var(--surface); stroke: var(--border)"/>
+<text x="512.48" y="735" font-size="14" text-anchor="middle">gore</text>
+<rect x="551.04" y="714" width="78.96000000000001" height="32" rx="16" style="fill: var(--surface); stroke: var(--border)"/>
+<text x="590.52" y="735" font-size="14" text-anchor="middle">weapons</text>
+<rect x="640.0" y="714" width="115.36" height="32" rx="16" style="fill: var(--surface); stroke: var(--border)"/>
+<text x="697.68" y="735" font-size="14" text-anchor="middle">hate symbols</text>
+<rect x="765.36" y="714" width="64.4" height="32" rx="16" style="fill: var(--surface); stroke: var(--border)"/>
+<text x="797.5600000000001" y="735" font-size="14" text-anchor="middle">drugs</text>
+<rect x="839.76" y="714" width="93.52" height="32" rx="16" style="fill: var(--surface); stroke: var(--border)"/>
+<text x="886.52" y="735" font-size="14" text-anchor="middle">self-harm</text>
+<rect x="943.28" y="714" width="78.96000000000001" height="32" rx="16" style="fill: var(--surface); stroke: var(--border)"/>
+<text x="982.76" y="735" font-size="14" text-anchor="middle">alcohol</text>
+<rect x="1032.24" y="714" width="78.96000000000001" height="32" rx="16" style="fill: var(--surface); stroke: var(--border)"/>
+<text x="1071.72" y="735" font-size="14" text-anchor="middle">tobacco</text>
+<rect x="48" y="758" width="180.88" height="32" rx="16" style="fill: var(--accent-soft); stroke: var(--accent); stroke-dasharray: 4 3"/>
+<text x="138.44" y="779" font-size="14" class="accent" text-anchor="middle">+ your own categories</text>
+<text x="48" y="846" font-size="14" class="label" text-anchor="start">ROADMAP</text>
+<line x1="108.0" y1="886" x2="1092.0" y2="886" style="stroke: var(--border); stroke-width: 3"/>
+<line x1="108.0" y1="886" x2="698.4000000000001" y2="886" style="stroke: var(--accent); stroke-width: 3"/>
+<circle cx="108.0" cy="886" r="9" style="fill: var(--accent); stroke: var(--accent)"/>
+<path d="M104.0,886 l3,3 l5,-6" style="stroke: var(--bg); stroke-width: 2; fill: none"/>
+<text x="108.0" y="918" font-size="15" font-weight="650" text-anchor="middle">v0.1</text>
+<text x="108.0" y="938" font-size="13" class="muted" text-anchor="middle">Core engine</text>
+<circle cx="304.8" cy="886" r="9" style="fill: var(--accent); stroke: var(--accent)"/>
+<path d="M300.8,886 l3,3 l5,-6" style="stroke: var(--bg); stroke-width: 2; fill: none"/>
+<text x="304.8" y="918" font-size="15" font-weight="650" text-anchor="middle">v0.2</text>
+<text x="304.8" y="938" font-size="13" class="muted" text-anchor="middle">CLI + training</text>
+<circle cx="501.6" cy="886" r="9" style="fill: var(--accent); stroke: var(--accent)"/>
+<path d="M497.6,886 l3,3 l5,-6" style="stroke: var(--bg); stroke-width: 2; fill: none"/>
+<text x="501.6" y="918" font-size="15" font-weight="650" text-anchor="middle">v0.3</text>
+<text x="501.6" y="938" font-size="13" class="muted" text-anchor="middle">REST API + Docker</text>
+<circle cx="698.4000000000001" cy="886" r="9" style="fill: var(--accent); stroke: var(--accent)"/>
+<path d="M694.4000000000001,886 l3,3 l5,-6" style="stroke: var(--bg); stroke-width: 2; fill: none"/>
+<text x="698.4000000000001" y="918" font-size="15" font-weight="650" text-anchor="middle">v0.4</text>
+<text x="698.4000000000001" y="938" font-size="13" class="muted" text-anchor="middle">Framework middleware</text>
+<circle cx="895.2" cy="886" r="9" style="fill: var(--bg); stroke: var(--border); stroke-width: 2"/>
+<text x="895.2" y="918" font-size="15" font-weight="650" class="muted" text-anchor="middle">v0.5</text>
+<text x="895.2" y="938" font-size="13" class="muted" text-anchor="middle">Video</text>
+<circle cx="1092.0" cy="886" r="9" style="fill: var(--bg); stroke: var(--border); stroke-width: 2"/>
+<text x="1092.0" y="918" font-size="15" font-weight="650" class="muted" text-anchor="middle">v1.0</text>
+<text x="1092.0" y="938" font-size="13" class="muted" text-anchor="middle">Stable release</text>
+<text x="48" y="982" font-size="13" class="muted" text-anchor="start">Apache-2.0  ·  github.com/karammm/openmoderate-image-moderation</text>
 </svg>

@@ -1,18 +1,28 @@
 from __future__ import annotations
 
-import hashlib
-
 import numpy as np
 import pytest
 from PIL import Image
 
 DIM = 512
+# The first dimensions are reserved for ColorEngine's colour features.
+_RESERVED = 8
+_TEXT_INDEX: dict[str, int] = {}
 
 
 def _vec(text: str) -> np.ndarray:
-    seed = int.from_bytes(hashlib.sha256(text.encode()).digest()[:4], "little")
-    v = np.random.default_rng(seed).standard_normal(DIM)
-    return v / np.linalg.norm(v)
+    """A one-hot vector per distinct text.
+
+    Exactly orthogonal vectors keep scores deterministic: unrelated content has
+    similarity 0, so no category can win by random overlap at CLIP's x100 logit scale.
+    """
+    if text not in _TEXT_INDEX:
+        _TEXT_INDEX[text] = _RESERVED + len(_TEXT_INDEX)
+        if _TEXT_INDEX[text] >= DIM:
+            raise RuntimeError("FakeEngine ran out of dimensions; raise DIM")
+    v = np.zeros(DIM)
+    v[_TEXT_INDEX[text]] = 1.0
+    return v
 
 
 class FakeEngine:
@@ -77,3 +87,22 @@ def make_dataset(root, n=12, seed=0):
             color = tuple(int(np.clip(c + rng.integers(-25, 25), 0, 255)) for c in base)
             solid(color).save(folder / f"{i}.png")
     return root
+
+
+def png_bytes(color) -> bytes:
+    import io
+
+    buf = io.BytesIO()
+    solid(color).save(buf, format="PNG")
+    return buf.getvalue()
+
+
+@pytest.fixture
+def shared_fake(fake_engine):
+    """Point every framework integration at a Moderator backed by the fake engine."""
+    from openmoderate import Moderator
+    from openmoderate.integrations import configure
+
+    configure(Moderator(engine=fake_engine))
+    yield fake_engine
+    configure()

@@ -1,19 +1,23 @@
 """Flask integration: reject violating image uploads.
 
-Per view, with a decorator::
+Per view, with a decorator:
 
-    from openmoderate.integrations.flask import moderate_uploads
+```python
+from openmoderate.integrations.flask import moderate_uploads
 
-    @app.post("/avatar")
-    @moderate_uploads("avatar")              # or no args: every file in the request
-    def avatar():
-        request.files["avatar"].save(...)    # only safe images get here
+@app.post("/avatar")
+@moderate_uploads("avatar")              # or no args: every file in the request
+def avatar():
+    request.files["avatar"].save(...)    # only safe images get here
+```
 
-Or for every request, with the extension::
+Or for every request, with the extension:
 
-    from openmoderate.integrations.flask import OpenModerate
+```python
+from openmoderate.integrations.flask import OpenModerate
 
-    OpenModerate(app, check_all_requests=True)
+OpenModerate(app, check_all_requests=True)
+```
 
 Violating images get a JSON ``422`` response (``413`` if too large).
 """
@@ -95,8 +99,8 @@ class OpenModerate:
     """Flask extension.
 
     Args:
-        app: The Flask app (or call :meth:`init_app` later).
-        moderator: A ready :class:`Moderator`; otherwise one is built lazily from the
+        app: The Flask app (or call `init_app` later).
+        moderator: A ready `Moderator`; otherwise one is built lazily from the
             ``OPENMODERATE_CONFIG`` / ``OPENMODERATE_HEAD`` app config keys.
         check_all_requests: Moderate every uploaded file on every request.
         on_unreadable: What to do with uploads that are not images. Defaults to

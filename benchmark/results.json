@@ -1,0 +1,394 @@
+{
+ "meta": {
+  "version": "1.0.0",
+  "model": "ViT-B-32 / laion2b_s34b_b79k",
+  "policy": "default",
+  "split": "test"
+ },
+ "categories": {
+  "alcohol": {
+   "images": 19,
+   "recall": 0.842,
+   "precision_vs_safe": 1.0,
+   "false_positives_on_safe": 0,
+   "flagged_any_category": 0.842
+  },
+  "drugs": {
+   "images": 26,
+   "recall": 0.846,
+   "precision_vs_safe": 0.815,
+   "false_positives_on_safe": 5,
+   "flagged_any_category": 0.885
+  },
+  "hate_symbols": {
+   "images": 18,
+   "recall": 0.611,
+   "precision_vs_safe": 1.0,
+   "false_positives_on_safe": 0,
+   "flagged_any_category": 0.611
+  },
+  "tobacco": {
+   "images": 27,
+   "recall": 0.593,
+   "precision_vs_safe": 0.889,
+   "false_positives_on_safe": 2,
+   "flagged_any_category": 0.63
+  },
+  "violence": {
+   "images": 11,
+   "recall": 0.818,
+   "precision_vs_safe": 1.0,
+   "false_positives_on_safe": 0,
+   "flagged_any_category": 0.818
+  },
+  "weapons": {
+   "images": 28,
+   "recall": 0.786,
+   "precision_vs_safe": 1.0,
+   "false_positives_on_safe": 0,
+   "flagged_any_category": 0.821
+  }
+ },
+ "safe": {
+  "images": 107,
+  "flagged": 6,
+  "false_positive_rate": 0.056
+ },
+ "safe_groups": {
+  "hard_negatives: Coffee cups": {
+   "images": 3,
+   "flagged": 0,
+   "flagged_as": []
+  },
+  "hard_negatives: Flags of the United States": {
+   "images": 3,
+   "flagged": 0,
+   "flagged_as": []
+  },
+  "hard_negatives: Glasses of milk": {
+   "images": 1,
+   "flagged": 0,
+   "flagged_as": []
+  },
+  "hard_negatives: Glasses of orange juice": {
+   "images": 4,
+   "flagged": 0,
+   "flagged_as": []
+  },
+  "hard_negatives: Kitchen knives": {
+   "images": 6,
+   "flagged": 0,
+   "flagged_as": []
+  },
+  "hard_negatives: Medicine bottles": {
+   "images": 5,
+   "flagged": 1,
+   "flagged_as": [
+    "drugs",
+    "tobacco"
+   ]
+  },
+  "hard_negatives: Tablets (pharmacy)": {
+   "images": 4,
+   "flagged": 0,
+   "flagged_as": []
+  },
+  "safe: Beaches": {
+   "images": 7,
+   "flagged": 1,
+   "flagged_as": [
+    "self_harm"
+   ]
+  },
+  "safe: Bicycles": {
+   "images": 7,
+   "flagged": 1,
+   "flagged_as": [
+    "drugs",
+    "tobacco"
+   ]
+  },
+  "safe: Birthday parties": {
+   "images": 4,
+   "flagged": 0,
+   "flagged_as": []
+  },
+  "safe: Business meetings": {
+   "images": 6,
+   "flagged": 0,
+   "flagged_as": []
+  },
+  "safe: Children playing": {
+   "images": 7,
+   "flagged": 1,
+   "flagged_as": [
+    "drugs"
+   ]
+  },
+  "safe: Dogs": {
+   "images": 6,
+   "flagged": 0,
+   "flagged_as": []
+  },
+  "safe: Food": {
+   "images": 5,
+   "flagged": 2,
+   "flagged_as": [
+    "drugs"
+   ]
+  },
+  "safe: Hiking": {
+   "images": 3,
+   "flagged": 0,
+   "flagged_as": []
+  },
+  "safe: Living rooms": {
+   "images": 4,
+   "flagged": 0,
+   "flagged_as": []
+  },
+  "safe: Markets": {
+   "images": 7,
+   "flagged": 0,
+   "flagged_as": []
+  },
+  "safe: Offices": {
+   "images": 5,
+   "flagged": 0,
+   "flagged_as": []
+  },
+  "safe: Portrait photographs of men": {
+   "images": 9,
+   "flagged": 0,
+   "flagged_as": []
+  },
+  "safe: Portrait photographs of women": {
+   "images": 8,
+   "flagged": 0,
+   "flagged_as": []
+  },
+  "safe: Weddings": {
+   "images": 3,
+   "flagged": 0,
+   "flagged_as": []
+  }
+ },
+ "errors": [
+  {
+   "file": "cocktails_04.jpg",
+   "label": "alcohol",
+   "flagged": []
+  },
+  {
+   "file": "glasses_of_beer_02.jpg",
+   "label": "alcohol",
+   "flagged": []
+  },
+  {
+   "file": "whisky_11.jpg",
+   "label": "alcohol",
+   "flagged": []
+  },
+  {
+   "file": "cannabis_smoking_08.jpg",
+   "label": "drugs",
+   "flagged": [
+    "alcohol",
+    "tobacco"
+   ]
+  },
+  {
+   "file": "cocaine_08.jpg",
+   "label": "drugs",
+   "flagged": []
+  },
+  {
+   "file": "joints_cannabis__08.jpg",
+   "label": "drugs",
+   "flagged": []
+  },
+  {
+   "file": "x_recreational_drug_use_05.jpg",
+   "label": "drugs",
+   "flagged": []
+  },
+  {
+   "file": "medicine_bottles_09.jpg",
+   "label": "hard_negatives",
+   "flagged": [
+    "drugs",
+    "tobacco"
+   ]
+  },
+  {
+   "file": "ku_klux_klan_01.jpg",
+   "label": "hate_symbols",
+   "flagged": []
+  },
+  {
+   "file": "ku_klux_klan_05.jpg",
+   "label": "hate_symbols",
+   "flagged": []
+  },
+  {
+   "file": "ku_klux_klan_16.jpg",
+   "label": "hate_symbols",
+   "flagged": []
+  },
+  {
+   "file": "nazi_flags_05.jpg",
+   "label": "hate_symbols",
+   "flagged": []
+  },
+  {
+   "file": "nazi_flags_16.jpg",
+   "label": "hate_symbols",
+   "flagged": []
+  },
+  {
+   "file": "nazi_flags_31.jpg",
+   "label": "hate_symbols",
+   "flagged": []
+  },
+  {
+   "file": "nazi_swastikas_11.jpg",
+   "label": "hate_symbols",
+   "flagged": []
+  },
+  {
+   "file": "beaches_08.jpg",
+   "label": "safe",
+   "flagged": [
+    "self_harm"
+   ]
+  },
+  {
+   "file": "bicycles_03.jpg",
+   "label": "safe",
+   "flagged": [
+    "drugs",
+    "tobacco"
+   ]
+  },
+  {
+   "file": "children_playing_00.jpg",
+   "label": "safe",
+   "flagged": [
+    "drugs"
+   ]
+  },
+  {
+   "file": "food_02.jpg",
+   "label": "safe",
+   "flagged": [
+    "drugs"
+   ]
+  },
+  {
+   "file": "food_13.jpg",
+   "label": "safe",
+   "flagged": [
+    "drugs"
+   ]
+  },
+  {
+   "file": "cigarette_smoking_04.jpg",
+   "label": "tobacco",
+   "flagged": []
+  },
+  {
+   "file": "cigarette_smoking_06.jpg",
+   "label": "tobacco",
+   "flagged": []
+  },
+  {
+   "file": "cigarette_smoking_14.jpg",
+   "label": "tobacco",
+   "flagged": []
+  },
+  {
+   "file": "cigarette_smoking_19.jpg",
+   "label": "tobacco",
+   "flagged": []
+  },
+  {
+   "file": "cigarettes_03.jpg",
+   "label": "tobacco",
+   "flagged": []
+  },
+  {
+   "file": "electronic_cigarettes_00.jpg",
+   "label": "tobacco",
+   "flagged": []
+  },
+  {
+   "file": "x_men_smoking_cigarettes_08.jpg",
+   "label": "tobacco",
+   "flagged": []
+  },
+  {
+   "file": "x_women_smoking_cigarettes_03.jpg",
+   "label": "tobacco",
+   "flagged": []
+  },
+  {
+   "file": "x_women_smoking_cigarettes_09.jpg",
+   "label": "tobacco",
+   "flagged": []
+  },
+  {
+   "file": "x_women_smoking_cigarettes_14.jpg",
+   "label": "tobacco",
+   "flagged": [
+    "alcohol"
+   ]
+  },
+  {
+   "file": "x_women_smoking_cigarettes_16.jpg",
+   "label": "tobacco",
+   "flagged": []
+  },
+  {
+   "file": "riots_14.jpg",
+   "label": "violence",
+   "flagged": []
+  },
+  {
+   "file": "x_2014_hrushevskoho_street_riots_12.jpg",
+   "label": "violence",
+   "flagged": []
+  },
+  {
+   "file": "assault_rifles_14.jpg",
+   "label": "weapons",
+   "flagged": []
+  },
+  {
+   "file": "assault_rifles_19.jpg",
+   "label": "weapons",
+   "flagged": []
+  },
+  {
+   "file": "hunting_rifles_06.jpg",
+   "label": "weapons",
+   "flagged": []
+  },
+  {
+   "file": "hunting_rifles_07.jpg",
+   "label": "weapons",
+   "flagged": []
+  },
+  {
+   "file": "hunting_rifles_09.jpg",
+   "label": "weapons",
+   "flagged": []
+  },
+  {
+   "file": "revolvers_10.jpg",
+   "label": "weapons",
+   "flagged": [
+    "drugs"
+   ]
+  }
+ ]
+}

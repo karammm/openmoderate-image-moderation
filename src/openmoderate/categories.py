@@ -51,6 +51,9 @@ SAFE_PROMPTS: tuple[str, ...] = (
     "a soldier or police officer in uniform at a parade",
     "people dancing at a party or concert",
     "a red painting or red colored object",
+    "a glass of milk",
+    "a glass of orange juice or soft drink",
+    "a cup of coffee or tea",
 )
 
 DEFAULT_CATEGORIES: tuple[Category, ...] = (
@@ -115,10 +118,12 @@ DEFAULT_CATEGORIES: tuple[Category, ...] = (
             "a photo of a gun",
             "a person holding a firearm or rifle",
             "a photo of a knife used as a weapon",
+            "a revolver or pistol",
         ),
         threshold=0.5,
         parent="violence",
         description="Firearms, knives and other weapons.",
+        negatives=("a kitchen knife for cooking food",),
     ),
     Category(
         "hate_symbols",
@@ -126,6 +131,8 @@ DEFAULT_CATEGORIES: tuple[Category, ...] = (
             "a nazi swastika flag",
             "a hate symbol or extremist flag",
             "a ku klux klan hood and robe",
+            "a nazi swastika armband or banner",
+            "people wearing ku klux klan robes and pointed hoods",
             "white supremacist propaganda",
         ),
         threshold=0.5,
@@ -135,10 +142,15 @@ DEFAULT_CATEGORIES: tuple[Category, ...] = (
     Category(
         "drugs",
         (
-            "a photo of illegal drugs and syringes",
+            "a photo of illegal drugs",
             "cocaine lines on a table",
             "a person injecting drugs with a needle",
             "pills and drug paraphernalia",
+            "a photo of marijuana buds",
+            "a rolled cannabis joint",
+            "a glass bong for smoking marijuana",
+            "a bag of white powder drugs",
+            "a person smoking marijuana",
         ),
         threshold=0.5,
         parent="drugs",
@@ -160,6 +172,10 @@ DEFAULT_CATEGORIES: tuple[Category, ...] = (
         (
             "a photo of alcoholic drinks and beer bottles",
             "a person drinking alcohol",
+            "a glass of beer",
+            "a glass of red wine",
+            "a cocktail drink in a glass",
+            "a bottle of whisky or liquor",
         ),
         threshold=0.6,
         parent="substances",
@@ -170,6 +186,8 @@ DEFAULT_CATEGORIES: tuple[Category, ...] = (
         (
             "a person smoking a cigarette",
             "a photo of cigarettes or vaping",
+            "a cigar",
+            "a pack of cigarettes",
         ),
         threshold=0.6,
         parent="substances",

@@ -1,23 +1,85 @@
 name: Release
 
+# Push a version tag (git tag v1.2.3 && git push --tags) to:
+#   1. check the tag matches the package version,
+#   2. build the sdist and wheel,
+#   3. create the GitHub release with notes from CHANGELOG.md (and backfill release pages
+#      for any older tags that lack one),
+#   4. publish to PyPI, once the repository variable PYPI_PUBLISH is set to "true" and
+#      PyPI trusted publishing is configured (see CONTRIBUTING.md).
+
 on:
-  release:
-    types: [published]
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
 
 jobs:
-  publish:
-    # Enable by setting the repository variable PYPI_PUBLISH=true once PyPI trusted
-    # publishing is configured for this repo.
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Check the tag matches the package version
+        run: |
+          version=$(python -c "import re; print(re.search(r'__version__ = \"(.+?)\"', open('src/openmoderate/__init__.py').read()).group(1))")
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package version $version"
+            exit 1
+          fi
+      - name: Check the changelog has an entry for this version
+        run: python scripts/changelog_section.py "$GITHUB_REF_NAME" > /dev/null
+      - run: pip install build && python -m build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  github-release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - name: Create the release for this tag
+        run: |
+          python scripts/changelog_section.py "$GITHUB_REF_NAME" > notes.md
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" dist/* --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" dist/* --title "$GITHUB_REF_NAME" --notes-file notes.md --verify-tag
+          fi
+      - name: Backfill release pages for older tags
+        run: |
+          for tag in $(git tag --list 'v*' --sort=version:refname); do
+            [ "$tag" = "$GITHUB_REF_NAME" ] && continue
+            gh release view "$tag" > /dev/null 2>&1 && continue
+            python scripts/changelog_section.py "$tag" > old.md || continue
+            gh release create "$tag" --title "$tag" --notes-file old.md --verify-tag --latest=false
+          done
+
+  pypi:
+    needs: build
     if: vars.PYPI_PUBLISH == 'true'
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
       id-token: write  # PyPI trusted publishing
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/download-artifact@v4
         with:
-          python-version: "3.11"
-      - run: pip install build
-      - run: python -m build
+          name: dist
+          path: dist/
       - uses: pypa/gh-action-pypi-publish@release/v1

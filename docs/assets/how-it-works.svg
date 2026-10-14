@@ -120,7 +120,7 @@
 <text x="138.44" y="779" font-size="14" class="accent" text-anchor="middle">+ your own categories</text>
 <text x="48" y="846" font-size="14" class="label" text-anchor="start">ROADMAP</text>
 <line x1="108.0" y1="886" x2="1092.0" y2="886" style="stroke: var(--border); stroke-width: 3"/>
-<line x1="108.0" y1="886" x2="895.2" y2="886" style="stroke: var(--accent); stroke-width: 3"/>
+<line x1="108.0" y1="886" x2="1092.0" y2="886" style="stroke: var(--accent); stroke-width: 3"/>
 <circle cx="108.0" cy="886" r="9" style="fill: var(--accent); stroke: var(--accent)"/>
 <path d="M104.0,886 l3,3 l5,-6" style="stroke: var(--bg); stroke-width: 2; fill: none"/>
 <text x="108.0" y="918" font-size="15" font-weight="650" text-anchor="middle">v0.1</text>
@@ -141,8 +141,9 @@
 <path d="M891.2,886 l3,3 l5,-6" style="stroke: var(--bg); stroke-width: 2; fill: none"/>
 <text x="895.2" y="918" font-size="15" font-weight="650" text-anchor="middle">v0.5</text>
 <text x="895.2" y="938" font-size="13" class="muted" text-anchor="middle">Video</text>
-<circle cx="1092.0" cy="886" r="9" style="fill: var(--bg); stroke: var(--border); stroke-width: 2"/>
-<text x="1092.0" y="918" font-size="15" font-weight="650" class="muted" text-anchor="middle">v1.0</text>
+<circle cx="1092.0" cy="886" r="9" style="fill: var(--accent); stroke: var(--accent)"/>
+<path d="M1088.0,886 l3,3 l5,-6" style="stroke: var(--bg); stroke-width: 2; fill: none"/>
+<text x="1092.0" y="918" font-size="15" font-weight="650" text-anchor="middle">v1.0</text>
 <text x="1092.0" y="938" font-size="13" class="muted" text-anchor="middle">Stable release</text>
 <text x="48" y="982" font-size="13" class="muted" text-anchor="start">Apache-2.0  ·  github.com/karammm/openmoderate-image-moderation</text>
 </svg>

@@ -49,6 +49,8 @@ class Moderator:
 
     Args:
         config: A `ModerationConfig`, a dict, or a path to a YAML file.
+        preset: ``"fast"`` (default), ``"balanced"`` or ``"accurate"``: which CLIP model
+            to use, with its calibration. See `openmoderate.config.PRESETS`.
         thresholds: Per-category threshold overrides, e.g. ``{"weapons": 0.4}``.
         categories: Only check these categories.
         exclude: Skip these categories.
@@ -65,6 +67,7 @@ class Moderator:
         self,
         config: ModerationConfig | Mapping | str | Path | None = None,
         *,
+        preset: str | None = None,
         thresholds: Mapping[str, float] | None = None,
         categories: list[str] | None = None,
         exclude: list[str] | None = None,
@@ -73,8 +76,14 @@ class Moderator:
         engine: Engine | None = None,
         device: str = "auto",
     ) -> None:
-        if config is None:
-            config = ModerationConfig()
+        if preset is not None:
+            if config is not None:
+                raise ValueError(
+                    "Pass either config or preset, not both (put 'preset:' in the config instead)"
+                )
+            config = ModerationConfig.from_preset(preset)
+        elif config is None:
+            config = ModerationConfig.default()
         elif isinstance(config, (str, Path)):
             config = ModerationConfig.from_yaml(config)
         elif isinstance(config, Mapping):

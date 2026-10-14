@@ -22,6 +22,7 @@ Settings, all optional:
 OPENMODERATE = {
     "CONFIG": BASE_DIR / "policy.yaml",   # policy YAML
     "HEAD": BASE_DIR / "my_head.omh",     # trained head
+    "PRESET": "accurate",                 # fast (default), balanced or accurate
     "DEVICE": "auto",
     "PATHS": ["/uploads/", "/api/"],      # middleware only; default: every path
     "ON_UNREADABLE": "allow",            # middleware: non-image files pass through
@@ -76,6 +77,8 @@ def _ensure_configured() -> None:
         kwargs["head"] = str(opts["HEAD"])
     if opts.get("DEVICE"):
         kwargs["device"] = opts["DEVICE"]
+    if opts.get("PRESET") and not opts.get("CONFIG"):
+        kwargs["preset"] = opts["PRESET"]
     configure(**kwargs)
 
 

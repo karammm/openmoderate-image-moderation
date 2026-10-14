@@ -20,6 +20,34 @@ a riot photo that also shows a gun is not a `weapons` false positive). The full
 per-group breakdown of false positives is in
 [`benchmark/RESULTS.md`](https://github.com/karammm/openmoderate-image-moderation/blob/main/benchmark/RESULTS.md).
 
+## Model presets (v1.1)
+
+`Moderator(preset=...)`, `--preset` on the CLI and `OPENMODERATE_PRESET` for the server choose
+a larger CLIP model. Measured on all 475 benchmark images:
+
+| Preset | Model | Size | Recall (avg) | Safe images flagged | Cross-validated recall | CPU | Apple GPU |
+|---|---|---:|---:|---:|---:|---:|---:|
+| `fast` (default) | ViT-B/32 | ~600 MB | 77% | 6.5% | 73.5% | 10 ms | 6 ms |
+| `balanced` | ViT-B/16 | ~600 MB | 77% | 4.7% | 79.5% | 32 ms | 16 ms |
+| `accurate` | ViT-L/14 | ~1.7 GB | **82%** | **4.2%** | **82.4%** | 129 ms | 68 ms |
+
+Per category, `accurate` scores: alcohol 87%, drugs 94%, hate symbols 73%, tobacco 72%,
+violence 87%, weapons 80% recall (the only category where it is slightly below `fast`, at 84%).
+
+How these were chosen:
+
+- Each preset's calibration follows one rule: the highest recall at which at most ~5% of safe
+  images are flagged. `fast` keeps its 1.0 calibration so existing scores don't change.
+- With small sets, a single dev/test split proved unreliable for comparing models (ViT-L/14
+  looked far better on dev than on test). The **cross-validated recall** column is the
+  fairer comparison: each half is scored with the calibration chosen on the other half, then
+  the two are averaged.
+- Speeds are per image in batches, on an Apple M-series machine (CPU with 4 threads, or the
+  built-in GPU via MPS). x86 servers and NVIDIA GPUs will differ; measure on your hardware.
+
+Trained heads are tied to the model they were trained with: retrain with `--preset` if you
+switch.
+
 ## Improvement over v0.5
 
 Same test images, same model, old versus new default prompts:

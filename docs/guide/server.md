@@ -13,7 +13,11 @@ Or with the published Docker image (CPU, model weights included, so it runs offl
 docker run -p 8000:8000 -e OPENMODERATE_API_KEY=change-me ghcr.io/karammm/openmoderate:latest
 ```
 
-Pin a version (`ghcr.io/karammm/openmoderate:1.0.0` or `:1.0`) in production. To build it yourself: `docker build -t openmoderate .` from a checkout.
+Pin a version (`ghcr.io/karammm/openmoderate:1.1.0` or `:1.1`) in production. The published image contains the `fast` model. For another preset, build your own image with its weights baked in:
+
+```bash
+docker build --build-arg OPENMODERATE_PRESET=accurate -t openmoderate:accurate .
+```
 
 Interactive API docs are served at `http://localhost:8000/docs`.
 
@@ -55,6 +59,7 @@ Server settings (environment variables):
 |---|---|---|
 | `OPENMODERATE_API_KEY` | unset | Require this value in the `X-API-Key` header. **Set it whenever the port is reachable by others.** |
 | `OPENMODERATE_ALLOW_URLS` | `false` | Allow `{"url": ...}` requests (see the security note below) |
+| `OPENMODERATE_PRESET` | `fast` | Model preset: `fast`, `balanced` or `accurate` (also `--preset`) |
 | `OPENMODERATE_CONFIG` / `OPENMODERATE_HEAD` | unset | Policy YAML and trained head to load (also `--config` / `--head`) |
 | `OPENMODERATE_MAX_BATCH` | `16` | Max files per batch request |
 | `OPENMODERATE_MAX_BYTES` | 25 MB | Max size per image |

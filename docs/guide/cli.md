@@ -5,6 +5,7 @@ openmoderate scan ./uploads                      # files, folders (recursive) or
 openmoderate scan ./uploads --json               # one JSON object per image
 openmoderate scan ./uploads --fail-on-violation  # exit code 1 if anything is flagged (CI, cron)
 openmoderate scan img.jpg -t weapons=0.3 --exclude alcohol tobacco
+openmoderate scan ./uploads --preset accurate    # larger, more accurate model
 openmoderate categories                          # list categories and thresholds
 openmoderate download                            # pre-fetch model weights for offline use
 ```

@@ -62,6 +62,9 @@ class ServerSettings:
     )
     config_path: str | None = field(default_factory=lambda: os.getenv("OPENMODERATE_CONFIG"))
     head_path: str | None = field(default_factory=lambda: os.getenv("OPENMODERATE_HEAD"))
+    #: Model preset ("fast", "balanced", "accurate"); read by ModerationConfig.default()
+    #: and by policy files without their own ``preset:`` key.
+    preset: str | None = field(default_factory=lambda: os.getenv("OPENMODERATE_PRESET"))
     #: Load the model at startup instead of on the first request.
     preload: bool = field(default_factory=lambda: _env_bool("OPENMODERATE_PRELOAD", True))
     device: str = field(default_factory=lambda: os.getenv("OPENMODERATE_DEVICE", "auto"))

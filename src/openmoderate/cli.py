@@ -28,8 +28,12 @@ def _parse_thresholds(items: list[str] | None) -> dict[str, float]:
     return out
 
 
+PRESET_HELP = "Model preset: fast (default), balanced or accurate"
+
+
 def _add_policy_args(p: argparse.ArgumentParser) -> None:
     p.add_argument("--config", help="Policy YAML file")
+    p.add_argument("--preset", choices=["fast", "balanced", "accurate"], help=PRESET_HELP)
     p.add_argument("--head", help="Trained head (.omh) from `openmoderate train`")
     p.add_argument(
         "--head-weight", type=float, default=1.0, help="Blend for labels in both (default 1.0)"
@@ -45,8 +49,11 @@ def _add_policy_args(p: argparse.ArgumentParser) -> None:
 def _build_moderator(args: argparse.Namespace):
     from openmoderate import Moderator
 
+    if args.config and args.preset:
+        raise SystemExit("Use either --config or --preset (put 'preset:' in the YAML instead)")
     return Moderator(
         args.config,
+        preset=args.preset,
         thresholds=_parse_thresholds(args.threshold),
         categories=args.only,
         exclude=args.exclude,
@@ -54,6 +61,16 @@ def _build_moderator(args: argparse.Namespace):
         head_weight=args.head_weight,
         device=args.device,
     )
+
+
+def _base_config(args: argparse.Namespace):
+    from openmoderate.config import ModerationConfig
+
+    if args.config and args.preset:
+        raise SystemExit("Use either --config or --preset (put 'preset:' in the YAML instead)")
+    if args.preset:
+        return ModerationConfig.from_preset(args.preset)
+    return ModerationConfig.from_yaml(args.config) if args.config else ModerationConfig.default()
 
 
 def cmd_scan(args: argparse.Namespace) -> int:
@@ -152,11 +169,10 @@ def _emit_error(args: argparse.Namespace, src: str, exc: Exception) -> None:
 
 
 def cmd_train(args: argparse.Namespace) -> int:
-    from openmoderate.config import ModerationConfig
     from openmoderate.engine.clip_engine import ClipEngine
     from openmoderate.training import FolderDataset, TrainConfig, train_head
 
-    cfg = ModerationConfig.from_yaml(args.config) if args.config else ModerationConfig()
+    cfg = _base_config(args)
     dataset = FolderDataset.from_folder(args.dataset, safe_label=args.safe_label)
     print(f"Dataset: {len(dataset)} images", file=sys.stderr)
     summary = dataset.summary()
@@ -258,7 +274,12 @@ def cmd_categories(args: argparse.Namespace) -> int:
     class _NoEngine:  # categories don't need the model
         pass
 
-    mod = Moderator(args.config, head=args.head, engine=_NoEngine())  # type: ignore[arg-type]
+    mod = Moderator(
+        args.config,
+        preset=args.preset,
+        head=args.head,
+        engine=_NoEngine(),  # type: ignore[arg-type]
+    )
     zero_shot = {c.name for c in mod.config.categories}
     trained = set(mod.head.labels) if mod.head else set()
     for spec in mod.label_specs:
@@ -270,10 +291,9 @@ def cmd_categories(args: argparse.Namespace) -> int:
 
 
 def cmd_download(args: argparse.Namespace) -> int:
-    from openmoderate.config import ModerationConfig
     from openmoderate.engine.clip_engine import ClipEngine
 
-    cfg = ModerationConfig.from_yaml(args.config) if args.config else ModerationConfig()
+    cfg = _base_config(args)
     print(f"Downloading {cfg.model_name} ({cfg.pretrained})...", file=sys.stderr)
     ClipEngine(cfg.model_name, cfg.pretrained, device="cpu", cache_dir=cfg.cache_dir).encode_texts(
         ["warm up"]
@@ -294,6 +314,7 @@ def cmd_serve(args: argparse.Namespace) -> int:
 
     # The app reads its settings from the environment so multi-worker mode works too.
     for env, value in (
+        ("OPENMODERATE_PRESET", args.preset),
         ("OPENMODERATE_CONFIG", args.config),
         ("OPENMODERATE_HEAD", args.head),
         ("OPENMODERATE_DEVICE", args.device),
@@ -349,6 +370,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--val-split", type=float, default=0.2)
     p.add_argument("--threshold", type=float, default=0.5, help="Decision threshold to store")
     p.add_argument("--config", help="Policy YAML (for model choice and category parents)")
+    p.add_argument("--preset", choices=["fast", "balanced", "accurate"], help=PRESET_HELP)
     p.add_argument("--device", default="auto")
     p.set_defaults(func=cmd_train)
 
@@ -361,11 +383,13 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("categories", help="List categories and thresholds")
     p.add_argument("--config")
+    p.add_argument("--preset", choices=["fast", "balanced", "accurate"], help=PRESET_HELP)
     p.add_argument("--head")
     p.set_defaults(func=cmd_categories)
 
     p = sub.add_parser("download", help="Pre-download model weights (for offline/Docker use)")
     p.add_argument("--config")
+    p.add_argument("--preset", choices=["fast", "balanced", "accurate"], help=PRESET_HELP)
     p.set_defaults(func=cmd_download)
 
     p = sub.add_parser("serve", help="Run the REST API server")
@@ -373,6 +397,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--port", type=int, default=8000)
     p.add_argument("--workers", type=int, default=1, help="Processes (each loads the model)")
     p.add_argument("--config", help="Policy YAML file")
+    p.add_argument("--preset", choices=["fast", "balanced", "accurate"], help=PRESET_HELP)
     p.add_argument("--head", help="Trained head (.omh)")
     p.add_argument("--device", help="auto, cpu, cuda or mps")
     p.add_argument("--allow-urls", action="store_true", help="Allow {'url': ...} requests")

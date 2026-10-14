@@ -16,14 +16,14 @@ change in minor releases.
 """
 
 from openmoderate.categories import DEFAULT_CATEGORIES, SAFE_PROMPTS, Category
-from openmoderate.config import ModerationConfig
+from openmoderate.config import PRESETS, ModerationConfig
 from openmoderate.io import ImageLoadError
 from openmoderate.moderator import LabelSpec, Moderator
 from openmoderate.result import Label, ModerationResult
 from openmoderate.training.head import LinearHead
 from openmoderate.video import VideoLoadError, VideoModerationResult, VideoSegment
 
-__version__ = "1.0.2"
+__version__ = "1.1.0"
 
 __all__ = [
     "DEFAULT_CATEGORIES",
@@ -36,6 +36,7 @@ __all__ = [
     "ModerationConfig",
     "ModerationResult",
     "Moderator",
+    "PRESETS",
     "VideoLoadError",
     "VideoModerationResult",
     "VideoSegment",

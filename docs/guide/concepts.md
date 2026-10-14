@@ -2,6 +2,8 @@
 
 openmoderate uses [OpenCLIP](https://github.com/mlfoundations/open_clip), a vision-language model that understands images and text in the same embedding space. Each moderation category is described by a few natural-language prompts (e.g. *"a photo of a gun"*). An image is flagged for a category when it matches that category's prompts clearly better than a pool of ordinary "safe" prompts (portraits, food, landscapes, national flags, logos, kitchen knives...).
 
+Three model sizes are available as presets (`fast`, `balanced`, `accurate`); larger models catch more and flag fewer safe images at the cost of speed — see [choosing a preset](python.md#choosing-a-model-preset).
+
 Because categories are just text, you can **add your own categories without any training data** — and when you do have data, a [trained head](training.md) sharpens accuracy for your use case.
 
 

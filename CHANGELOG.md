@@ -4,6 +4,23 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-14
+
+### Added
+- Model presets: `Moderator(preset="fast" | "balanced" | "accurate")`, `--preset` on every CLI
+  command, `preset:` in policy files, `OPENMODERATE_PRESET` for the server and integrations, and
+  a `docker build --build-arg OPENMODERATE_PRESET=...` option. `accurate` (CLIP ViT-L/14) reaches
+  82% average recall with 4.2% of safe images flagged on the benchmark, versus 77% / 6.5% for
+  `fast`; `balanced` (ViT-B/16) matches `fast`'s recall with 4.7% flagged. Calibrations follow a
+  single rule (best recall with at most ~5% of safe images flagged) and were compared with 2-fold
+  cross-validation.
+- `PRESETS` and `ModerationConfig.from_preset()` / `ModerationConfig.default()`.
+- `benchmark/run.py --preset`.
+
+### Unchanged
+- The default (`fast`) model, calibration and scores are identical to 1.0.x; existing trained
+  heads keep working.
+
 ## [1.0.2] - 2026-10-14
 
 ### Added

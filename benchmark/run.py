@@ -153,6 +153,7 @@ def to_markdown(report: dict, meta: dict) -> str:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--config", help="Policy YAML")
+    parser.add_argument("--preset", choices=["fast", "balanced", "accurate"], help="Model preset")
     parser.add_argument("--head", help="Trained head (.omh)")
     parser.add_argument("--device", default="auto")
     parser.add_argument(
@@ -167,9 +168,9 @@ def main(argv: list[str] | None = None) -> int:
 
     rows = [r for r in load_manifest() if args.split == "all" or r["split"] == args.split]
     rows = download(rows)
-    mod = Moderator(args.config, head=args.head, device=args.device)
+    mod = Moderator(args.config, preset=args.preset, head=args.head, device=args.device)
     report = evaluate(rows, mod)
-    custom = " ".join(p for p in (args.config, args.head) if p)
+    custom = " ".join(p for p in (args.preset, args.config, args.head) if p)
     meta = {
         "version": openmoderate.__version__,
         "model": f"{mod.config.model_name} / {mod.config.pretrained}",

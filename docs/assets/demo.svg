@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="442" viewBox="0 0 900 442" role="img" aria-labelledby="dtitle ddesc" xml:space="preserve">
+<title id="dtitle">openmoderate terminal demo</title>
+<desc id="ddesc">A terminal session: installing openmoderate, scanning a folder of uploads (a pistol, a riot and a swastika are flagged, a beach, a dog and a US flag are safe), then starting the REST server and checking a photo of a cigarette, which is flagged as tobacco.</desc>
+<style>
+  :root, svg {
+    --bg: #ffffff; --surface: #f6f8fa; --border: #d0d7de; --text: #1f2328;
+    --muted: #59636e; --accent: #0969da; --accent-soft: #ddf4ff; --safe: #1a7f37;
+    --flag: #cf222e; --code: #1f2328; --term-bg: #0d1117; --term-text: #e6edf3;
+    --term-muted: #8b949e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root, svg {
+      --bg: #0d1117; --surface: #161b22; --border: #30363d; --text: #e6edf3;
+      --muted: #9198a1; --accent: #4493f8; --accent-soft: #121d2f; --safe: #3fb950;
+      --flag: #f85149; --code: #e6edf3; --term-bg: #010409; --term-text: #e6edf3;
+      --term-muted: #8b949e;
+    }
+  }
+  text {
+    white-space: pre; fill: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .muted { fill: var(--muted); }
+  .accent { fill: var(--accent); }
+  .safe { fill: var(--safe); }
+  .flag { fill: var(--flag); }
+  .label { font-size: 13px; font-weight: 600; letter-spacing: 0.08em; fill: var(--muted); }
+  .box { fill: var(--surface); stroke: var(--border); stroke-width: 1; }
+  .arrow { stroke: var(--muted); stroke-width: 1.5; fill: none; }
+@keyframes l0 { 0%, 8.12% { opacity: 0 } 8.72%, 92.0% { opacity: 1 } 100% { opacity: 0 } }
+@keyframes l1 { 0%, 17.50% { opacity: 0 } 18.10%, 92.0% { opacity: 1 } 100% { opacity: 0 } }
+@keyframes l2 { 0%, 23.44% { opacity: 0 } 24.04%, 92.0% { opacity: 1 } 100% { opacity: 0 } }
+@keyframes l3 { 0%, 25.62% { opacity: 0 } 26.22%, 92.0% { opacity: 1 } 100% { opacity: 0 } }
+@keyframes l4 { 0%, 27.81% { opacity: 0 } 28.41%, 92.0% { opacity: 1 } 100% { opacity: 0 } }
+@keyframes l5 { 0%, 30.00% { opacity: 0 } 30.60%, 92.0% { opacity: 1 } 100% { opacity: 0 } }
+@keyframes l6 { 0%, 32.19% { opacity: 0 } 32.79%, 92.0% { opacity: 1 } 100% { opacity: 0 } }
+@keyframes l7 { 0%, 34.37% { opacity: 0 } 34.97%, 92.0% { opacity: 1 } 100% { opacity: 0 } }
+@keyframes l8 { 0%, 36.56% { opacity: 0 } 37.16%, 92.0% { opacity: 1 } 100% { opacity: 0 } }
+@keyframes l9 { 0%, 38.75% { opacity: 0 } 39.35%, 92.0% { opacity: 1 } 100% { opacity: 0 } }
+@keyframes l10 { 0%, 44.37% { opacity: 0 } 44.97%, 92.0% { opacity: 1 } 100% { opacity: 0 } }
+@keyframes l11 { 0%, 53.75% { opacity: 0 } 54.35%, 92.0% { opacity: 1 } 100% { opacity: 0 } }
+@keyframes l12 { 0%, 59.69% { opacity: 0 } 60.29%, 92.0% { opacity: 1 } 100% { opacity: 0 } }
+.l0 { opacity: 0; animation: l0 16.0s linear infinite; }
+.l1 { opacity: 0; animation: l1 16.0s linear infinite; }
+.l2 { opacity: 0; animation: l2 16.0s linear infinite; }
+.l3 { opacity: 0; animation: l3 16.0s linear infinite; }
+.l4 { opacity: 0; animation: l4 16.0s linear infinite; }
+.l5 { opacity: 0; animation: l5 16.0s linear infinite; }
+.l6 { opacity: 0; animation: l6 16.0s linear infinite; }
+.l7 { opacity: 0; animation: l7 16.0s linear infinite; }
+.l8 { opacity: 0; animation: l8 16.0s linear infinite; }
+.l9 { opacity: 0; animation: l9 16.0s linear infinite; }
+.l10 { opacity: 0; animation: l10 16.0s linear infinite; }
+.l11 { opacity: 0; animation: l11 16.0s linear infinite; }
+.l12 { opacity: 0; animation: l12 16.0s linear infinite; }
+  .term { fill: var(--term-bg); }
+  .tt { fill: var(--term-text); font-size: 14px; }
+  .tm { fill: var(--term-muted); font-size: 14px; }
+  .ts { fill: #3fb950; font-size: 14px; }
+  .tf { fill: #f85149; font-size: 14px; }
+  .prompt { fill: #4493f8; font-size: 14px; }
+  @media (prefers-reduced-motion: reduce) {
+    .ln { animation: none !important; opacity: 1 !important; }
+  }
+</style>
+<rect class="term" width="900" height="442" rx="12"/>
+<circle cx="24" cy="22" r="6" fill="#ff5f57"/>
+<circle cx="44" cy="22" r="6" fill="#febc2e"/>
+<circle cx="64" cy="22" r="6" fill="#28c840"/>
+<text x="450.0" y="27" text-anchor="middle" class="tm mono" font-size="13">openmoderate demo</text>
+<text x="24" y="64" class="mono ln l0"><tspan class="prompt">$ </tspan><tspan class="tt">pip install openmoderate</tspan></text>
+<text x="24" y="90" class="mono ln l1"><tspan class="prompt">$ </tspan><tspan class="tt">openmoderate scan ./uploads</tspan></text>
+<text x="24" y="116" class="mono ln ts l2">SAFE     uploads/beach.jpg</text>
+<text x="24" y="142" class="mono ln tf l3">FLAGGED  uploads/pistol.jpg     weapons 100%</text>
+<text x="24" y="168" class="mono ln ts l4">SAFE     uploads/dog.jpg</text>
+<text x="24" y="194" class="mono ln tf l5">FLAGGED  uploads/riot.jpg       violence 99%</text>
+<text x="24" y="220" class="mono ln tf l6">FLAGGED  uploads/swastika.jpg   hate_symbols 100%</text>
+<text x="24" y="246" class="mono ln ts l7">SAFE     uploads/flag_us.jpg</text>
+<text x="24" y="272" class="mono ln tt l8">6 scanned, 3 flagged, 0 unreadable</text>
+<text x="24" y="298" class="mono ln tt l9"></text>
+<text x="24" y="324" class="mono ln l10"><tspan class="prompt">$ </tspan><tspan class="tt">openmoderate serve --port 8000 &amp;</tspan></text>
+<text x="24" y="350" class="mono ln l11"><tspan class="prompt">$ </tspan><tspan class="tt">curl -F file=@cigarette.jpg localhost:8000/v1/moderate</tspan></text>
+<text x="24" y="376" class="mono ln tt l12">{&quot;is_safe&quot;: false, &quot;violations&quot;: [{&quot;name&quot;: &quot;tobacco&quot;, &quot;confidence&quot;: 0.96}]}</text>
+</svg>

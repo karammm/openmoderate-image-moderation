@@ -4,6 +4,10 @@
 
 Think of it as an open alternative to Amazon Rekognition's `DetectModerationLabels` that runs inside your own app.
 
+<p align="center">
+  <img src="docs/assets/demo.svg" alt="Terminal demo: openmoderate scans a folder, flagging a pistol (weapons 100%), a riot (violence 99%) and a swastika (hate_symbols 100%) while a beach, a dog and a US flag pass as safe; then the REST server flags a cigarette photo as tobacco (0.96)." width="820">
+</p>
+
 ```python
 from openmoderate import Moderator
 
@@ -14,6 +18,8 @@ if not result.is_safe:
     print(result.violations)
     # [Label(name='weapons', confidence=0.9612, parent='violence', threshold=0.5)]
 ```
+
+![How openmoderate works: upload, normalize, embed with CLIP, compare against category and safe prompts, score, and decide with your thresholds. Use it as a Python library, a CLI or a REST API. Detects 11 categories out of the box, plus your own.](docs/assets/how-it-works.svg)
 
 > **Status: alpha (v0.3).** The Python API, the `openmoderate` CLI, training on your own data and the REST API server are usable today. Framework middleware and video are coming next — see the [roadmap](#roadmap).
 

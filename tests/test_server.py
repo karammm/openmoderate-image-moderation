@@ -135,3 +135,33 @@ def test_preload_loads_model(fake_engine):
     with TestClient(app) as c:
         assert c.get("/health").json()["model_loaded"] is True
     assert fake_engine.text_calls == 1
+
+
+def test_video_endpoint(tmp_path):
+    pytest.importorskip("cv2")
+    from conftest import RED_GUN, NearestColorEngine, make_video
+
+    def video_client(**settings):
+        settings.setdefault("preload", False)
+        mod = Moderator(engine=NearestColorEngine(RED_GUN))
+        return TestClient(create_app(mod, ServerSettings(**settings)))
+
+    data = make_video(tmp_path / "v.mp4", [(GREEN, 1), (RED, 2), (GREEN, 1)]).read_bytes()
+    c = video_client()
+    r = c.post("/v1/moderate/video", files={"file": ("clip.mp4", data)})
+    assert r.status_code == 200
+    body = r.json()
+    assert body["is_safe"] is False and body["source"] == "clip.mp4"
+    assert body["segments"][0]["name"] == "weapons"
+
+    r = c.post("/v1/moderate/video?fps=2&stop_on_violation=true", files={"file": ("c.mp4", data)})
+    assert r.json()["stopped_early"] is True
+
+    assert c.post("/v1/moderate/video?fps=50", files={"file": ("c.mp4", data)}).status_code == 422
+    bad = c.post("/v1/moderate/video", files={"file": ("x.mp4", b"nope")})
+    assert bad.status_code == 422
+
+    short = video_client(max_video_seconds=2)
+    assert short.post("/v1/moderate/video", files={"file": ("c.mp4", data)}).status_code == 413
+    small = video_client(max_video_bytes=100)
+    assert small.post("/v1/moderate/video", files={"file": ("c.mp4", data)}).status_code == 413

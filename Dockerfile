@@ -21,7 +21,7 @@ RUN pip install torch torchvision --index-url https://download.pytorch.org/whl/c
 
 COPY pyproject.toml README.md LICENSE ./
 COPY src ./src
-RUN pip install ".[server]"
+RUN pip install ".[server,video]"
 
 RUN useradd --create-home --uid 1000 app && mkdir -p /models && chown app /models
 USER app

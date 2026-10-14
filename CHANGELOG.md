@@ -4,6 +4,27 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-14
+
+### Added
+- Video moderation (`pip install "openmoderate[video]"`): `Moderator.analyze_video()` samples
+  frames, scores them in batches and returns timestamped `segments` per violated label, with
+  `fps`, `min_frames`, `stop_on_violation`, `max_duration` and `keep_frame_scores` options.
+- `openmoderate scan` handles video files (`--fps`, `--min-frames`, `--max-duration`).
+- REST endpoint `POST /v1/moderate/video`, streamed to disk with size and duration limits
+  (`OPENMODERATE_MAX_VIDEO_BYTES`, `OPENMODERATE_MAX_VIDEO_SECONDS`). Docker image includes
+  video support.
+- Decoding limits enforced while decoding (frame size, decoded frames, duration), not taken
+  from the file's metadata.
+- Border trimming (`trim_borders`, on by default): letterbox bars and uniform padding are
+  cropped before scoring, for images, video frames, training and evaluation alike.
+
+### Changed
+- Border trimming changes some scores. On our test set it removed a false `sexual_activity`
+  detection on letterboxed video and turned a missed `alcohol` detection (a glass of wine on
+  a plain background, 0.54) into a hit (0.78). Set `trim_borders: false` to keep the old
+  behaviour.
+
 ## [0.4.0] - 2026-10-14
 
 ### Added

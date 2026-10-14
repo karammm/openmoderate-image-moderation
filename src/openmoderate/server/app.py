@@ -19,6 +19,7 @@ import base64
 import binascii
 import hmac
 import os
+import tempfile
 import threading
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
@@ -29,7 +30,7 @@ from openmoderate.io import MAX_BYTES, ImageLoadError
 from openmoderate.moderator import Moderator
 
 try:
-    from fastapi import Depends, FastAPI, File, HTTPException, Request, UploadFile
+    from fastapi import Depends, FastAPI, File, HTTPException, Query, Request, UploadFile
     from fastapi.responses import JSONResponse
     from pydantic import BaseModel
 except ImportError as exc:  # pragma: no cover - exercised only without the extra
@@ -53,6 +54,12 @@ class ServerSettings:
     allow_urls: bool = field(default_factory=lambda: _env_bool("OPENMODERATE_ALLOW_URLS", False))
     max_batch: int = field(default_factory=lambda: int(os.getenv("OPENMODERATE_MAX_BATCH", "16")))
     max_bytes: int = MAX_BYTES
+    max_video_bytes: int = field(
+        default_factory=lambda: int(os.getenv("OPENMODERATE_MAX_VIDEO_BYTES", 200 * 1024 * 1024))
+    )
+    max_video_seconds: float = field(
+        default_factory=lambda: float(os.getenv("OPENMODERATE_MAX_VIDEO_SECONDS", "600"))
+    )
     config_path: str | None = field(default_factory=lambda: os.getenv("OPENMODERATE_CONFIG"))
     head_path: str | None = field(default_factory=lambda: os.getenv("OPENMODERATE_HEAD"))
     #: Load the model at startup instead of on the first request.
@@ -185,6 +192,59 @@ def create_app(
         except (binascii.Error, ValueError) as exc:
             raise HTTPException(422, "image_base64 is not valid base64") from exc
         return analyze([data], [None])[0]
+
+    @app.post("/v1/moderate/video", dependencies=[Depends(require_key)])
+    def moderate_video(
+        file: Annotated[UploadFile, File()],
+        fps: Annotated[float, Query(gt=0, le=5)] = 1.0,
+        min_frames: Annotated[int, Query(ge=1, le=100)] = 1,
+        stop_on_violation: bool = False,
+    ) -> dict:
+        """Moderate a video by sampling ``fps`` frames per second.
+
+        Returns timestamped ``segments`` per violated label. Videos longer than the
+        server's limit are rejected with 413 rather than partially checked.
+        """
+        from openmoderate.video import VideoLoadError
+
+        suffix = os.path.splitext(file.filename or "")[1] or ".mp4"
+        fd, path = tempfile.mkstemp(suffix=suffix, prefix="openmoderate-")
+        try:
+            # Stream to disk with a byte cap instead of reading the whole video into memory.
+            written = 0
+            with os.fdopen(fd, "wb") as out:
+                while chunk := file.file.read(1024 * 1024):
+                    written += len(chunk)
+                    if written > settings.max_video_bytes:
+                        raise HTTPException(413, f"Video exceeds {settings.max_video_bytes} bytes")
+                    out.write(chunk)
+            if written == 0:
+                raise HTTPException(422, "Video is empty")
+            mod = get_moderator()
+            try:
+                with lock:
+                    result = mod.analyze_video(
+                        path,
+                        fps=fps,
+                        min_frames=min_frames,
+                        stop_on_violation=stop_on_violation,
+                        max_duration=settings.max_video_seconds,
+                    )
+            except ImportError as exc:
+                raise HTTPException(
+                    501, 'Video support is not installed: pip install "openmoderate[video]"'
+                ) from exc
+            except VideoLoadError as exc:
+                raise HTTPException(422, str(exc)) from exc
+            if result.truncated:
+                raise HTTPException(
+                    413, f"Video is longer than {settings.max_video_seconds:g} seconds"
+                )
+            result.source = file.filename
+            return result.to_dict()
+        finally:
+            if os.path.exists(path):
+                os.unlink(path)
 
     return app
 

@@ -31,8 +31,8 @@
 </style>
 <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill: var(--muted)"/></marker></defs>
 <rect width="1200" height="1006" rx="16" style="fill: var(--bg)"/>
-<text x="48" y="64"><tspan font-size="36" font-weight="700">openmoderate</tspan><tspan dx="16" font-size="20" class="muted">open-source image moderation for Python</tspan></text>
-<text x="48" y="98" font-size="16" class="muted" text-anchor="start">Detect nudity, violence, weapons, hate symbols, drugs and more in uploaded images. Runs on your own servers: no cloud account, no per-image fees.</text>
+<text x="48" y="64"><tspan font-size="36" font-weight="700">openmoderate</tspan><tspan dx="16" font-size="20" class="muted">open-source image &amp; video moderation for Python</tspan></text>
+<text x="48" y="98" font-size="16" class="muted" text-anchor="start">Detect nudity, violence, weapons, hate symbols, drugs and more in images and videos. Runs on your servers: no cloud account, no per-image fees.</text>
 <text x="48" y="152" font-size="14" class="label" text-anchor="start">HOW IT WORKS</text>
 <rect class="box" x="48.0" y="170" width="160" height="104" rx="10"/>
 <text x="62.0" y="200" font-size="16" font-weight="650" text-anchor="start">1  Upload</text>
@@ -120,7 +120,7 @@
 <text x="138.44" y="779" font-size="14" class="accent" text-anchor="middle">+ your own categories</text>
 <text x="48" y="846" font-size="14" class="label" text-anchor="start">ROADMAP</text>
 <line x1="108.0" y1="886" x2="1092.0" y2="886" style="stroke: var(--border); stroke-width: 3"/>
-<line x1="108.0" y1="886" x2="698.4000000000001" y2="886" style="stroke: var(--accent); stroke-width: 3"/>
+<line x1="108.0" y1="886" x2="895.2" y2="886" style="stroke: var(--accent); stroke-width: 3"/>
 <circle cx="108.0" cy="886" r="9" style="fill: var(--accent); stroke: var(--accent)"/>
 <path d="M104.0,886 l3,3 l5,-6" style="stroke: var(--bg); stroke-width: 2; fill: none"/>
 <text x="108.0" y="918" font-size="15" font-weight="650" text-anchor="middle">v0.1</text>
@@ -137,8 +137,9 @@
 <path d="M694.4000000000001,886 l3,3 l5,-6" style="stroke: var(--bg); stroke-width: 2; fill: none"/>
 <text x="698.4000000000001" y="918" font-size="15" font-weight="650" text-anchor="middle">v0.4</text>
 <text x="698.4000000000001" y="938" font-size="13" class="muted" text-anchor="middle">Framework middleware</text>
-<circle cx="895.2" cy="886" r="9" style="fill: var(--bg); stroke: var(--border); stroke-width: 2"/>
-<text x="895.2" y="918" font-size="15" font-weight="650" class="muted" text-anchor="middle">v0.5</text>
+<circle cx="895.2" cy="886" r="9" style="fill: var(--accent); stroke: var(--accent)"/>
+<path d="M891.2,886 l3,3 l5,-6" style="stroke: var(--bg); stroke-width: 2; fill: none"/>
+<text x="895.2" y="918" font-size="15" font-weight="650" text-anchor="middle">v0.5</text>
 <text x="895.2" y="938" font-size="13" class="muted" text-anchor="middle">Video</text>
 <circle cx="1092.0" cy="886" r="9" style="fill: var(--bg); stroke: var(--border); stroke-width: 2"/>
 <text x="1092.0" y="918" font-size="15" font-weight="650" class="muted" text-anchor="middle">v1.0</text>

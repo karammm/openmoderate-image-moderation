@@ -10,7 +10,7 @@ import numpy as np
 
 from openmoderate.config import ModerationConfig
 from openmoderate.engine.base import Engine
-from openmoderate.io import ImageInput, describe_source, load_image
+from openmoderate.io import ImageInput, describe_source, load_image, trim_borders
 from openmoderate.result import Label, ModerationResult
 from openmoderate.training.head import LinearHead
 
@@ -195,6 +195,12 @@ class Moderator:
         extra = head_scores[:, self._extra_cols]
         return np.clip(np.concatenate([scores, extra], axis=1), 0.0, 0.9999)
 
+    def score_images(self, images: list) -> np.ndarray:
+        """Scores for already-loaded RGB PIL images (after border trimming, if enabled)."""
+        if self.config.trim_borders:
+            images = [trim_borders(im) for im in images]
+        return self.score_all(self.engine.encode_images(images))
+
     def _build_result(self, scores: np.ndarray, source: str | None) -> ModerationResult:
         labels = [
             Label(spec.name, round(float(s), 4), parent=spec.parent, threshold=spec.threshold)
@@ -212,8 +218,50 @@ class Moderator:
         pil_images = [load_image(s) for s in sources]
         if not pil_images:
             return []
-        scores = self.score_all(self.engine.encode_images(pil_images))
+        scores = self.score_images(pil_images)
         return [self._build_result(row, describe_source(s)) for row, s in zip(scores, sources)]
 
     def is_safe(self, image: ImageInput) -> bool:
         return self.analyze(image).is_safe
+
+    def analyze_video(
+        self,
+        video,
+        *,
+        fps: float = 1.0,
+        max_frames: int | None = None,
+        max_duration: float | None = None,
+        min_frames: int = 1,
+        stop_on_violation: bool = False,
+        batch_size: int = 16,
+        keep_frame_scores: bool = False,
+    ):
+        """Moderate a video by sampling frames (needs ``pip install "openmoderate[video]"``).
+
+        Args:
+            video: Path, bytes or file object.
+            fps: Frames sampled per second of video.
+            max_frames: Stop after this many sampled frames.
+            max_duration: Stop decoding after this many seconds (``result.truncated``).
+            min_frames: Ignore segments shorter than this many flagged frames, to suppress
+                one-frame false positives.
+            stop_on_violation: Stop at the first violating segment, for fast rejection.
+            keep_frame_scores: Include every sampled frame's scores in the result.
+
+        Returns:
+            A :class:`openmoderate.video.VideoModerationResult` with timestamped
+            ``segments`` per violated label.
+        """
+        from openmoderate.video import analyze_video
+
+        return analyze_video(
+            self,
+            video,
+            fps=fps,
+            max_frames=max_frames,
+            max_duration=max_duration,
+            min_frames=min_frames,
+            stop_on_violation=stop_on_violation,
+            batch_size=batch_size,
+            keep_frame_scores=keep_frame_scores,
+        )

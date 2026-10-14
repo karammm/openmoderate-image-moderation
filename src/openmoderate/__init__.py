@@ -5,7 +5,7 @@ from openmoderate.config import ModerationConfig
 from openmoderate.moderator import Moderator
 from openmoderate.result import Label, ModerationResult
 
-__version__ = "0.4.0"
+__version__ = "0.5.0"
 
 __all__ = [
     "DEFAULT_CATEGORIES",

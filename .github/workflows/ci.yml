@@ -50,6 +50,13 @@ jobs:
           test "$(curl -s -o /dev/null -w '%{http_code}' -F file=@blue.png localhost:8000/v1/moderate)" = 401
           curl -sf -H 'X-API-Key: ci-key' -F file=@blue.png localhost:8000/v1/moderate | tee out.json
           grep '"is_safe":true' out.json
+          # Video support works end to end: build a 3 s clip inside the container (which has
+          # OpenCV) and moderate it. Without OpenCV the endpoint would return 501.
+          docker exec om python -c "import cv2, numpy as np; w = cv2.VideoWriter('/tmp/v.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 10, (64, 64)); [w.write(np.full((64, 64, 3), (208, 144, 64), np.uint8)) for _ in range(30)]; w.release()"
+          docker cp om:/tmp/v.mp4 v.mp4
+          curl -sf -H 'X-API-Key: ci-key' -F file=@v.mp4 localhost:8000/v1/moderate/video | tee video.json
+          grep '"frames_analyzed":3' video.json
+          grep '"segments":\[\]' video.json
       - name: Container logs
         if: always()
         run: docker logs om || true

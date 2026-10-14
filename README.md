@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/karammm/openmoderate-image-moderation/actions/workflows/ci.yml/badge.svg)](https://github.com/karammm/openmoderate-image-moderation/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/openmoderate?color=blue)](https://pypi.org/project/openmoderate/)
-[![Python](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue)](https://pypi.org/project/openmoderate/)
+[![Python](https://img.shields.io/badge/python-3.9%20%E2%80%93%203.14-blue)](https://pypi.org/project/openmoderate/)
 [![Docs](https://img.shields.io/badge/docs-online-blue)](https://karammm.github.io/openmoderate-image-moderation/)
 [![Docker](https://img.shields.io/badge/docker-ghcr.io%2Fkarammm%2Fopenmoderate-blue)](https://github.com/karammm/openmoderate-image-moderation/pkgs/container/openmoderate)
 [![License](https://img.shields.io/github/license/karammm/openmoderate-image-moderation)](https://github.com/karammm/openmoderate-image-moderation/blob/main/LICENSE)

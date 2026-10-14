@@ -1,10 +1,10 @@
-"""The main entry point: :class:`Moderator`."""
+"""The main entry point: `Moderator`."""
 
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
 from pathlib import Path
-from typing import NamedTuple
+from typing import TYPE_CHECKING, NamedTuple
 
 import numpy as np
 
@@ -13,6 +13,11 @@ from openmoderate.engine.base import Engine
 from openmoderate.io import ImageInput, describe_source, load_image, trim_borders
 from openmoderate.result import Label, ModerationResult
 from openmoderate.training.head import LinearHead
+
+if TYPE_CHECKING:
+    from PIL import Image
+
+    from openmoderate.video import VideoInput, VideoModerationResult
 
 
 class _TextIndex(NamedTuple):
@@ -31,21 +36,23 @@ class LabelSpec(NamedTuple):
 class Moderator:
     """Detect policy-violating content in images.
 
-    Example::
+    For example:
 
-        from openmoderate import Moderator
+    ```python
+    from openmoderate import Moderator
 
-        mod = Moderator()
-        result = mod.analyze("upload.jpg")
-        if not result.is_safe:
-            print(result.violations)
+    mod = Moderator()
+    result = mod.analyze("upload.jpg")
+    if not result.is_safe:
+        print(result.violations)
+    ```
 
     Args:
-        config: A :class:`ModerationConfig`, a dict, or a path to a YAML file.
+        config: A `ModerationConfig`, a dict, or a path to a YAML file.
         thresholds: Per-category threshold overrides, e.g. ``{"weapons": 0.4}``.
         categories: Only check these categories.
         exclude: Skip these categories.
-        head: A trained head (``.omh`` path or :class:`LinearHead`) from
+        head: A trained head (``.omh`` path or `LinearHead`) from
             ``openmoderate train``. Its labels are added to the result; labels that also
             exist as zero-shot categories are blended according to ``head_weight``.
         head_weight: For labels known to both, ``1.0`` uses only the trained head,
@@ -179,7 +186,7 @@ class Moderator:
         return np.clip(scores, 0.0, 0.9999)
 
     def score_all(self, image_embeddings: np.ndarray) -> np.ndarray:
-        """Final scores for every label in :attr:`category_names` (zero-shot + head)."""
+        """Final scores for every label in `category_names` (zero-shot + head)."""
         scores = self.score_embeddings(image_embeddings)
         if self.head is None:
             return scores
@@ -195,7 +202,7 @@ class Moderator:
         extra = head_scores[:, self._extra_cols]
         return np.clip(np.concatenate([scores, extra], axis=1), 0.0, 0.9999)
 
-    def score_images(self, images: list) -> np.ndarray:
+    def score_images(self, images: list[Image.Image]) -> np.ndarray:
         """Scores for already-loaded RGB PIL images (after border trimming, if enabled)."""
         if self.config.trim_borders:
             images = [trim_borders(im) for im in images]
@@ -226,7 +233,7 @@ class Moderator:
 
     def analyze_video(
         self,
-        video,
+        video: VideoInput,
         *,
         fps: float = 1.0,
         max_frames: int | None = None,
@@ -235,7 +242,7 @@ class Moderator:
         stop_on_violation: bool = False,
         batch_size: int = 16,
         keep_frame_scores: bool = False,
-    ):
+    ) -> VideoModerationResult:
         """Moderate a video by sampling frames (needs ``pip install "openmoderate[video]"``).
 
         Args:
@@ -249,7 +256,7 @@ class Moderator:
             keep_frame_scores: Include every sampled frame's scores in the result.
 
         Returns:
-            A :class:`openmoderate.video.VideoModerationResult` with timestamped
+            A `openmoderate.video.VideoModerationResult` with timestamped
             ``segments`` per violated label.
         """
         from openmoderate.video import analyze_video

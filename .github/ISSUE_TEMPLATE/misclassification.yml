@@ -1,0 +1,39 @@
+name: Misclassification (false positive / missed content)
+description: The model flagged something harmless, or missed something it should catch
+labels: [accuracy]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Never attach or link harmful images** (nudity, gore, abuse, extremist material)
+        in this public tracker. Describe them in words instead. For harmless false
+        positives (e.g. a kitchen knife flagged as a weapon), attaching the image is
+        welcome if you have the right to share it.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind
+      options:
+        - False positive (harmless content was flagged)
+        - Missed content (violating content was not flagged)
+    validations:
+      required: true
+  - type: input
+    id: category
+    attributes:
+      label: Category
+      placeholder: e.g. weapons
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the image
+      description: What does the image show? Include the scores from result.to_dict().
+    validations:
+      required: true
+  - type: textarea
+    id: pattern
+    attributes:
+      label: Is it systematic?
+      description: Does it happen across many similar images? Have you tried a policy change (thresholds, negatives) or a trained head?

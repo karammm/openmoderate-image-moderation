@@ -1,8 +1,8 @@
 """Drop-in upload moderation for web frameworks.
 
-* FastAPI: :mod:`openmoderate.integrations.fastapi`
-* Flask:   :mod:`openmoderate.integrations.flask`
-* Django:  :mod:`openmoderate.integrations.django`
+* FastAPI: `openmoderate.integrations.fastapi`
+* Flask:   `openmoderate.integrations.flask`
+* Django:  `openmoderate.integrations.django`
 """
 
 from openmoderate.integrations._common import (

@@ -2,7 +2,7 @@
 
 All integrations share one embedding engine per process, because the CLIP model is large
 (~600 MB). Different policies (thresholds, categories) get their own lightweight
-:class:`Moderator` on top of that shared engine.
+`Moderator` on top of that shared engine.
 """
 
 from __future__ import annotations
@@ -49,10 +49,10 @@ _base: Moderator | None = None
 _derived: dict[tuple, Moderator] = {}
 
 
-def configure(moderator: Moderator | None = None, **kwargs: Any) -> None:
+def configure(moderator: Moderator | None = None, /, **kwargs: Any) -> None:
     """Set the moderator the integrations use.
 
-    Pass a ready :class:`Moderator`, or keyword arguments for one (``config``, ``head``,
+    Pass a ready `Moderator`, or keyword arguments for one (``config``, ``head``,
     ``thresholds``, ``device``, ...), which is then created lazily on first use. Call this
     once at startup; calling it again replaces the shared moderator.
     """
@@ -130,7 +130,7 @@ def check_image(
     """Moderate raw image bytes.
 
     Returns the result for a safe image, ``None`` for an unreadable file that is allowed
-    through, and raises :class:`ImageRejected` / :class:`UnreadableUpload` otherwise.
+    through, and raises `ImageRejected` / `UnreadableUpload` otherwise.
     """
     if on_unreadable not in ("reject", "allow"):
         raise ValueError("on_unreadable must be 'reject' or 'allow'")

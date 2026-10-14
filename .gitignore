@@ -13,3 +13,5 @@ htmlcov/
 *.omh
 .idea/
 .vscode/
+benchmark/data/
+site/

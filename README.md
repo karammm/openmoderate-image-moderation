@@ -21,7 +21,7 @@ if not result.is_safe:
 
 ![How openmoderate works: upload, normalize, embed with CLIP, compare against category and safe prompts, score, and decide with your thresholds. Use it as a Python library, a CLI or a REST API. Detects 11 categories out of the box, plus your own.](docs/assets/how-it-works.svg)
 
-> **Status: alpha (v0.5).** Images and videos; Python API, `openmoderate` CLI, training on your own data, REST API server and drop-in protection for FastAPI, Flask and Django. Next: the stable v1.0 — see the [roadmap](#roadmap).
+[**Documentation**](https://karammm.github.io/openmoderate-image-moderation/) · [Benchmarks](benchmark/RESULTS.md) · [Changelog](CHANGELOG.md) · [Security](SECURITY.md)
 
 ## Install
 
@@ -29,372 +29,69 @@ if not result.is_safe:
 pip install openmoderate
 ```
 
-Requires Python 3.9+. The first call downloads the CLIP model weights (~600 MB) and caches them; after that everything runs offline. CPU works fine; CUDA and Apple Silicon (MPS) are used automatically when available.
+Python 3.9+. The first call downloads the CLIP model weights (~600 MB) once; after that everything runs offline, on CPU, CUDA or Apple Silicon. Extras: `openmoderate[server]`, `[video]`, `[fastapi]`, `[flask]`, `[django]`. See the [install notes](https://karammm.github.io/openmoderate-image-moderation/#install) for CPU-only servers.
 
-On a CPU-only Linux server you can save ~2 GB by installing the CPU build of PyTorch first. Install `torch` and `torchvision` **together** from the same index, otherwise their versions won't match:
+## What you can do with it
 
-```bash
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
-pip install openmoderate
-```
-
-## How it works
-
-openmoderate uses [OpenCLIP](https://github.com/mlfoundations/open_clip), a vision-language model that understands images and text in the same embedding space. Each moderation category is described by a few natural-language prompts (e.g. *"a photo of a gun"*). An image is flagged for a category when it matches that category's prompts clearly better than a pool of ordinary "safe" prompts (portraits, food, landscapes, national flags, logos, kitchen knives...).
-
-Because categories are just text, you can **add your own categories without any training data** — and when you do have data, a [trained head](#train-on-your-own-data) sharpens accuracy for your use case.
-
-## Usage
-
-### Inputs
-
-`analyze()` accepts a file path, `pathlib.Path`, URL, raw `bytes`, a file-like object (e.g. a Django/Flask upload) or a `PIL.Image`:
+**Tune the policy** — thresholds, categories and your own categories as plain text, no training data needed ([guide](https://karammm.github.io/openmoderate-image-moderation/guide/python/)):
 
 ```python
-mod.analyze("photo.png")
-mod.analyze("https://example.com/photo.jpg")
-mod.analyze(request.files["avatar"])        # Flask
-mod.analyze(uploaded_file.read())           # bytes
-results = mod.analyze_batch(["a.jpg", "b.jpg", "c.jpg"])   # faster for many images
-```
-
-### Results
-
-```python
-result.is_safe           # bool
-result.violations        # labels that crossed their threshold
-result.labels            # every category with its confidence, highest first
-result.score("weapons")  # 0.9612
-result.to_dict()         # JSON-serialisable
-```
-
-### Default categories
-
-| Category | Parent | Default threshold |
-|---|---|---|
-| `nudity` | explicit | 0.50 |
-| `sexual_activity` | explicit | 0.50 |
-| `suggestive` | suggestive | 0.60 |
-| `violence` | violence | 0.50 |
-| `gore` | violence | 0.45 |
-| `weapons` | violence | 0.50 |
-| `hate_symbols` | hate | 0.50 |
-| `drugs` | drugs | 0.50 |
-| `self_harm` | self_harm | 0.45 |
-| `alcohol` | substances | 0.60 |
-| `tobacco` | substances | 0.60 |
-
-### Tuning your policy
-
-```python
-# Stricter on weapons, ignore alcohol and tobacco
 mod = Moderator(thresholds={"weapons": 0.3}, exclude=["alcohol", "tobacco"])
-
-# Only check for explicit content
-mod = Moderator(categories=["nudity", "sexual_activity"])
+mod = Moderator("policy.yaml")   # custom categories like "gambling" in YAML
 ```
 
-Or keep the policy in a YAML file:
+**Scan from the command line** — folders, URLs and videos; `--fail-on-violation` for CI ([guide](https://karammm.github.io/openmoderate-image-moderation/guide/cli/)):
 
-```yaml
-# policy.yaml
-thresholds:
-  weapons: 0.3
-  suggestive: 0.8
-disabled: [alcohol, tobacco]
-custom_categories:
-  - name: gambling
-    prompts: ["a casino slot machine", "people gambling at a poker table"]
-    negatives: ["people playing a board game"]   # benign look-alikes
-    threshold: 0.5
+```bash
+openmoderate scan ./uploads
 ```
+
+**Train on your own images** for better accuracy in your domain ([guide](https://karammm.github.io/openmoderate-image-moderation/guide/training/)):
+
+```bash
+openmoderate train ./dataset -o my_head.omh      # dataset/<label>/*.jpg + dataset/safe/
+```
+
+**Moderate videos** with timestamped segments ([guide](https://karammm.github.io/openmoderate-image-moderation/guide/video/)):
 
 ```python
-mod = Moderator("policy.yaml")
+Moderator().analyze_video("clip.mp4").segments   # weapons 0:03–0:06, violence 0:09–0:12
 ```
 
-Images and video frames have letterbox bars and uniform padding trimmed before scoring, because borders change what the model sees (on a test video, black bars pushed a pistol frame's `sexual_activity` score from 0.01 to 0.65). Set `trim_borders: false` in the policy YAML to turn this off.
-
-`negatives` are category-specific contrast prompts: things that look similar but should not count for *this* category (for example, the built-in `drugs` category treats cigarettes as a negative, because they belong to `tobacco`).
-
-### Configuration via environment
-
-| Variable | Purpose |
-|---|---|
-| `OPENMODERATE_CACHE_DIR` | Where model weights are cached |
-| `OPENMODERATE_MODEL` / `OPENMODERATE_PRETRAINED` | Swap the OpenCLIP model (default `ViT-B-32` / `laion2b_s34b_b79k`) |
-| `OPENMODERATE_MAX_BYTES` | Reject uploads larger than this (default 25 MB) |
-
-## Command line
-
-```bash
-openmoderate scan ./uploads                      # files, folders (recursive) or URLs
-openmoderate scan ./uploads --json               # one JSON object per image
-openmoderate scan ./uploads --fail-on-violation  # exit code 1 if anything is flagged (CI, cron)
-openmoderate scan img.jpg -t weapons=0.3 --exclude alcohol tobacco
-openmoderate categories                          # list categories and thresholds
-openmoderate download                            # pre-fetch model weights for offline use
-```
-
-Exit codes for `scan`: `0` success, `1` something was flagged (only with `--fail-on-violation`), `2` some files could not be read.
-
-## Train on your own data
-
-Zero-shot works out of the box, but a head trained on *your* images is more accurate for your domain, and lets you add labels that are hard to describe in words.
-
-**1. Arrange images in folders.** One folder per label, plus `safe/` for acceptable images:
-
-```
-dataset/
-├── weapons/        # images that should be flagged as "weapons"
-├── counterfeit/    # a brand-new label of your own
-└── safe/           # a broad sample of your normal, acceptable traffic
-```
-
-An image that belongs to several labels can be copied into several folders.
-
-**2. Train** (CPU is fine; a few hundred images takes about a minute):
-
-```bash
-openmoderate train ./dataset -o my_head.omh
-```
-
-This prints precision and recall on a held-out split, then saves a head trained on all the images.
-
-**3. Use it:**
+**Protect uploads in FastAPI, Flask or Django** with one line ([guide](https://karammm.github.io/openmoderate-image-moderation/guide/integrations/)):
 
 ```python
-mod = Moderator(head="my_head.omh")
+async def avatar(file: ModeratedFile): ...                          # FastAPI
+avatar = models.ImageField(validators=[ModerationValidator()])      # Django
 ```
+
+**Call it over HTTP from any language** — REST server and Docker image ([guide](https://karammm.github.io/openmoderate-image-moderation/guide/server/)):
 
 ```bash
-openmoderate scan ./uploads --head my_head.omh
-```
-
-Labels that exist in both the head and the zero-shot categories (like `weapons` above) use the trained score by default. Pass `head_weight=0.5` (or `--head-weight 0.5`) to blend the two. New labels (like `counterfeit`) are added to the results.
-
-**4. Evaluate** on a separate labelled folder that was not used for training:
-
-```bash
-openmoderate evaluate ./holdout --head my_head.omh
-openmoderate evaluate ./holdout                 # measure the zero-shot defaults on your data
-```
-
-> **The `safe/` folder matters most.** The head learns what is *not* a violation from it. In our tests, a `dog` head trained with only cats and city photos in `safe/` scored 100% on held-out validation, yet flagged 6 of 20 unrelated photos (people, a meeting, a boxing match) as dogs. After adding 24 varied everyday photos to `safe/`, it flagged none. Fill `safe/` with a broad, representative sample of the images your users actually upload, and evaluate on images from outside the training set.
-
-Heads are saved as `.omh` files: a NumPy archive with no pickle, so loading a head from someone else cannot run code.
-
-## Videos
-
-```bash
-pip install "openmoderate[video]"
-```
-
-```python
-result = Moderator().analyze_video("clip.mp4")      # path, bytes or file object
-result.is_safe        # False
-result.segments       # [VideoSegment(name='weapons', start=3.0, end=6.0, max_confidence=0.9949, frames=3)]
-```
-
-```bash
-$ openmoderate scan ./media          # images and videos, recursively
-FLAGGED  media/slideshow.mp4  [video 15.0s, 15 frames]
-           0:03.0-0:06.0  weapons 99%
-           0:09.0-0:12.0  violence 99%
-```
-
-openmoderate samples frames (1 per second by default), scores them in batches and merges consecutive flagged frames into timestamped segments. A single missed sample inside a segment doesn't split it.
-
-| Option | Default | Purpose |
-|---|---|---|
-| `fps` | `1.0` | Frames sampled per second. Raise it to catch brief content, lower it for speed. |
-| `min_frames` | `1` | Ignore segments shorter than N sampled frames (suppresses one-frame false positives). |
-| `stop_on_violation` | `False` | Stop at the first violation: fast rejection for upload flows. |
-| `max_duration` | none | Only analyse the first N seconds; `result.truncated` tells you if it stopped early. |
-| `keep_frame_scores` | `False` | Include every sampled frame's scores in the result. |
-
-The same options exist on the CLI (`--fps`, `--min-frames`, `--max-duration`) and on the REST endpoint `POST /v1/moderate/video` (multipart field `file`; query parameters `fps`, `min_frames`, `stop_on_violation`).
-
-Things to know:
-
-- **Content between samples is not seen.** At 1 fps, a half-second flash can be missed. Use a higher `fps` when that matters.
-- **Video decoding runs FFmpeg (via OpenCV) on untrusted input.** openmoderate caps frame size, decoded frames and duration while decoding, rather than trusting the file's metadata. The server rejects videos over `OPENMODERATE_MAX_VIDEO_SECONDS` (default 600) or `OPENMODERATE_MAX_VIDEO_BYTES` (default 200 MB) with `413`, instead of returning a partially checked result. For hostile traffic, also run the server in a sandboxed container.
-- The framework integrations (FastAPI, Flask, Django) moderate images; a video upload counts as "not an image" there. Call `analyze_video()` from your view for video uploads.
-
-## Protect uploads in your web app
-
-Add one line and violating images are rejected before your code runs. The file is rewound after the check, so you can save it as usual. All integrations in a process share one loaded model (~600 MB), even when endpoints use different policies.
-
-### FastAPI
-
-```bash
-pip install "openmoderate[fastapi]"
-```
-
-```python
-from fastapi import FastAPI, UploadFile
-from openmoderate.integrations.fastapi import ModeratedFile, moderated
-
-app = FastAPI()
-
-@app.post("/avatar")
-async def avatar(file: ModeratedFile):        # form field "file"
-    ...                                        # only safe images reach this line
-
-@app.post("/listing")
-async def listing(photo: UploadFile = moderated("photo", thresholds={"weapons": 0.3})):
-    ...                                        # a stricter policy for this endpoint
-```
-
-Use `ModeratedFiles` / `moderated_files("field")` for multi-file fields. Moderation runs in a worker thread, so the event loop isn't blocked. A rejected upload gets `422` with `{"detail": {"error": "image_rejected", "field": "file", "violations": ["weapons"], ...}}`.
-
-### Flask
-
-```bash
-pip install "openmoderate[flask]"
-```
-
-```python
-from openmoderate.integrations.flask import OpenModerate, moderate_uploads
-
-@app.post("/avatar")
-@moderate_uploads("avatar")        # no arguments = every file in the request
-def avatar():
-    request.files["avatar"].save(...)
-
-# Or check every upload on every request:
-OpenModerate(app, check_all_requests=True)
-```
-
-### Django
-
-```bash
-pip install "openmoderate[django]"
-```
-
-```python
-from openmoderate.integrations.django import ModerationValidator
-
-class Profile(models.Model):
-    avatar = models.ImageField(validators=[ModerationValidator()])
-    banner = models.ImageField(validators=[ModerationValidator(thresholds={"suggestive": 0.4})])
-```
-
-The validator works in model forms, the admin and Django REST Framework model serializers, and is safe to use in migrations. Users see "This image was rejected by content moderation (weapons)." To guard whole URL prefixes instead, add the middleware:
-
-```python
-MIDDLEWARE = [..., "openmoderate.integrations.django.ModerationMiddleware"]
-OPENMODERATE = {
-    "PATHS": ["/uploads/", "/api/"],   # default: every path
-    "CONFIG": BASE_DIR / "policy.yaml",
-    "HEAD": BASE_DIR / "my_head.omh",
-}
-```
-
-### Behaviour common to all integrations
-
-| | Explicit (dependency, decorator, validator) | Blanket (Flask extension, Django middleware) |
-|---|---|---|
-| Violating image | rejected, `422` | rejected, `422` |
-| Larger than 25 MB | rejected, `413` | rejected, `413` |
-| Not an image (PDF, CSV…) | rejected (`on_unreadable="reject"`) | passed through (`on_unreadable="allow"`) |
-| Empty file input | skipped (the view decides whether it's required) | skipped |
-
-Error responses list the violated category names but **not the confidence scores**, because exact scores help an attacker tweak an image until it passes. Pass `include_scores=True` if you need them. To share a custom moderator across everything, call `openmoderate.integrations.configure(Moderator(...))` at startup.
-
-Runnable examples: [`examples/fastapi_app.py`](examples/fastapi_app.py), [`examples/flask_app.py`](examples/flask_app.py), [`examples/django_app.py`](examples/django_app.py).
-
-## REST API server
-
-Use openmoderate from any language over HTTP.
-
-```bash
-pip install "openmoderate[server]"
-OPENMODERATE_API_KEY=change-me openmoderate serve --host 0.0.0.0 --port 8000
-```
-
-Or with Docker (model weights are baked into the image, so it runs offline):
-
-```bash
-docker build -t openmoderate .
 docker run -p 8000:8000 -e OPENMODERATE_API_KEY=change-me openmoderate
+curl -H "X-API-Key: change-me" -F file=@upload.jpg localhost:8000/v1/moderate
 ```
 
-Interactive API docs are served at `http://localhost:8000/docs`.
+## Accuracy
 
-| Endpoint | Body | Returns |
-|---|---|---|
-| `GET /health` | – | `{"status": "ok", "model_loaded": true}` (no API key needed) |
-| `GET /v1/categories` | – | labels, parents and thresholds |
-| `POST /v1/moderate` | multipart field `file` | one result |
-| `POST /v1/moderate/batch` | multipart field `files` (repeat it) | `{"results": [...]}`; unreadable files get an `error` entry |
-| `POST /v1/moderate/json` | `{"image_base64": "..."}` or `{"url": "..."}` | one result |
-| `POST /v1/moderate/video` | multipart field `file`; query `fps`, `min_frames`, `stop_on_violation` | timestamped `segments` |
+Measured on a held-out set of hand-reviewed, openly licensed photos ([full results and method](https://karammm.github.io/openmoderate-image-moderation/benchmarks/), reproducible with `python benchmark/run.py`):
 
-```bash
-curl -H "X-API-Key: change-me" -F file=@upload.jpg http://localhost:8000/v1/moderate
-```
+| Category | Recall | Precision |
+|---|---:|---:|
+| `drugs` | 85% | 82% |
+| `alcohol` | 84% | 100% |
+| `violence` | 82% | 100% |
+| `weapons` | 79% | 100% |
+| `hate_symbols` | 61% | 100% |
+| `tobacco` | 59% | 89% |
 
-```json
-{
-  "source": "upload.jpg",
-  "is_safe": false,
-  "violations": [{"name": "weapons", "confidence": 0.996, "parent": "violence", "threshold": 0.5}],
-  "labels": [...]
-}
-```
+6% of safe images (including look-alikes such as kitchen knives, milk and medicine) were flagged. Sets are small, so read these as ±10 points. Nudity, sexual content, gore and self-harm are **not** benchmarked by the maintainers — evaluate them on your own data.
 
-```javascript
-// Node.js
-const form = new FormData();
-form.append("file", new Blob([fs.readFileSync("upload.jpg")]), "upload.jpg");
-const res = await fetch("http://localhost:8000/v1/moderate", {
-  method: "POST", headers: { "X-API-Key": "change-me" }, body: form,
-});
-const { is_safe, violations } = await res.json();
-```
-
-Server settings (environment variables):
-
-| Variable | Default | Purpose |
-|---|---|---|
-| `OPENMODERATE_API_KEY` | unset | Require this value in the `X-API-Key` header. **Set it whenever the port is reachable by others.** |
-| `OPENMODERATE_ALLOW_URLS` | `false` | Allow `{"url": ...}` requests (see the security note below) |
-| `OPENMODERATE_CONFIG` / `OPENMODERATE_HEAD` | unset | Policy YAML and trained head to load (also `--config` / `--head`) |
-| `OPENMODERATE_MAX_BATCH` | `16` | Max files per batch request |
-| `OPENMODERATE_MAX_BYTES` | 25 MB | Max size per image |
-| `OPENMODERATE_MAX_VIDEO_BYTES` / `OPENMODERATE_MAX_VIDEO_SECONDS` | 200 MB / 600 s | Video upload limits |
-| `OPENMODERATE_PRELOAD` | `true` | Load the model at startup rather than on the first request |
-
-**URL fetching is off by default.** A server that downloads any URL it is given can be tricked into reaching internal services (cloud metadata endpoints, admin panels). When you enable it, openmoderate only allows http(s), refuses private, loopback and link-local addresses, and re-checks every redirect. If untrusted callers can use the API, also route outbound traffic through an egress proxy.
-
-Performance: a single-image request took 15–25 ms end to end on an Apple M-series laptop once the model was warm. CPU-only servers will be slower, so measure on your own hardware before sizing. Requests are processed one at a time per worker (PyTorch already uses all cores for each image). Use `--workers N` to run more processes; each loads its own copy of the model (~600 MB RAM).
-
-## Accuracy and limitations
-
-Be honest with yourself about what zero-shot moderation can do:
-
-- It is **good at clear-cut cases** (a handgun, a swastika, a street fight, someone smoking) and at rejecting common look-alikes (national flags, kitchen knives, medicine).
-- It **will miss subtle cases** and some objects (e.g. a plain glass of beer scores low on `alcohol`), and can be fooled by adversarial images.
-- Thresholds were tuned on a small hand-labelled set of public-domain images. The explicit-content categories could not be validated on real explicit images by the maintainers — **evaluate on a sample of your own traffic before relying on it**, and adjust thresholds.
-- For high-stakes moderation, use openmoderate as a first-pass filter and send borderline scores to human review.
-
-[Training a head on your own labelled data](#train-on-your-own-data) is the recommended way to get production-grade accuracy for your domain.
-
-## Roadmap
-
-| Version | Scope |
-|---|---|
-| **v0.1** | Core zero-shot engine + Python API ✅ |
-| **v0.2** | `openmoderate` CLI (`scan`, `train`, `evaluate`) + training on your own data ✅ |
-| **v0.3** | REST API server (`openmoderate serve`) + Docker image ✅ |
-| **v0.4** | Drop-in upload protection for FastAPI, Flask and Django ✅ |
-| **v0.5** | Video moderation (frame sampling, timestamped segments) ✅ |
-| v1.0 | Stable API, docs site, public benchmarks |
+Zero-shot moderation is good at clear-cut cases and will miss subtle ones. Evaluate on a sample of your own traffic, adjust thresholds, and send borderline scores to human review for high-stakes decisions. [How it works and its limits](https://karammm.github.io/openmoderate-image-moderation/guide/concepts/).
 
 ## Contributing
 
-Contributions are welcome — better prompts, new categories, benchmark datasets and bug reports especially. See [CONTRIBUTING.md](CONTRIBUTING.md).
+Contributions are welcome — better prompts, new categories, benchmark images and bug reports especially. See [CONTRIBUTING.md](CONTRIBUTING.md). Report security issues privately ([SECURITY.md](SECURITY.md)).
 
 ## Responsible use
 
@@ -402,4 +99,4 @@ openmoderate is meant to help keep platforms safe. Do not use it to surveil indi
 
 ## License
 
-[Apache 2.0](LICENSE)
+[Apache 2.0](LICENSE). Benchmark images keep their own licences (see [`benchmark/manifest.csv`](benchmark/manifest.csv)).

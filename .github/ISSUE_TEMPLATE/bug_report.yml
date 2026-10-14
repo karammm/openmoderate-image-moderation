@@ -1,0 +1,29 @@
+name: Bug report
+description: Something crashes, errors or behaves differently from the docs
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal reproduction
+      description: Code or commands we can run. Use a harmless placeholder image.
+      render: python
+  - type: input
+    id: version
+    attributes:
+      label: openmoderate version
+      placeholder: python -c "import openmoderate; print(openmoderate.__version__)"
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Python version and OS
+      placeholder: Python 3.11, Ubuntu 24.04

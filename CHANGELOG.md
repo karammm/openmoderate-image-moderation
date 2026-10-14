@@ -4,6 +4,35 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-10-14
+
+First stable release. The public API (everything importable from `openmoderate`, the
+integration modules, CLI flags, REST endpoints and the `.omh` format) now follows semantic
+versioning; default prompts and thresholds may still be tuned in minor releases.
+
+### Added
+- Public, reproducible benchmark (`benchmark/`): 475 hand-reviewed, openly licensed
+  Wikimedia Commons photos across weapons, hate symbols, alcohol, tobacco, drugs, violence,
+  safe images and look-alikes, with a dev/test split. `python benchmark/run.py` reproduces
+  the published numbers.
+- Documentation site (MkDocs) with guides, benchmarks and an API reference generated from
+  the docstrings, deployed to GitHub Pages.
+- Release automation: pushing a `vX.Y.Z` tag builds the package, creates the GitHub
+  release from the changelog and (once enabled) publishes to PyPI.
+- Type information (`py.typed`) and `mypy` in CI.
+- Top-level exports: `LabelSpec`, `LinearHead`, `ImageLoadError`, `VideoLoadError`,
+  `VideoModerationResult`, `VideoSegment`, `SAFE_PROMPTS`.
+- `SECURITY.md`, issue templates (including a misclassification report that asks people
+  not to attach harmful images) and a pull-request template.
+
+### Changed
+- More complete default prompts, measured on the held-out test half: `drugs` recall 15% →
+  85%, `alcohol` 53% → 84%, `tobacco` 44% → 59%, `hate_symbols` 50% → 61%, with the safe
+  false-positive rate at 6% (was 5%). New safe look-alikes: milk, juice, coffee; kitchen
+  knives are now a `weapons` negative.
+- `integrations.configure()` takes the moderator as a positional-only argument.
+- The README is now an overview; detailed guides moved to the docs site.
+
 ## [0.5.0] - 2026-10-14
 
 ### Added

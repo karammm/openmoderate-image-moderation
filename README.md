@@ -15,7 +15,7 @@ if not result.is_safe:
     # [Label(name='weapons', confidence=0.9612, parent='violence', threshold=0.5)]
 ```
 
-> **Status: alpha (v0.1).** The Python API is usable today. The CLI, custom training, REST server and framework middleware are coming in the next releases — see the [roadmap](#roadmap).
+> **Status: alpha (v0.2).** The Python API, the `openmoderate` CLI and training on your own data are usable today. The REST server and framework middleware are coming in the next releases — see the [roadmap](#roadmap).
 
 ## Install
 
@@ -29,7 +29,7 @@ Requires Python 3.9+. The first call downloads the CLIP model weights (~600 MB) 
 
 openmoderate uses [OpenCLIP](https://github.com/mlfoundations/open_clip), a vision-language model that understands images and text in the same embedding space. Each moderation category is described by a few natural-language prompts (e.g. *"a photo of a gun"*). An image is flagged for a category when it matches that category's prompts clearly better than a pool of ordinary "safe" prompts (portraits, food, landscapes, national flags, logos, kitchen knives...).
 
-Because categories are just text, you can **add your own categories without any training data** — and when you do have data, a fine-tuned head (v0.2) sharpens accuracy for your use case.
+Because categories are just text, you can **add your own categories without any training data** — and when you do have data, a [trained head](#train-on-your-own-data) sharpens accuracy for your use case.
 
 ## Usage
 
@@ -110,6 +110,65 @@ mod = Moderator("policy.yaml")
 | `OPENMODERATE_MODEL` / `OPENMODERATE_PRETRAINED` | Swap the OpenCLIP model (default `ViT-B-32` / `laion2b_s34b_b79k`) |
 | `OPENMODERATE_MAX_BYTES` | Reject uploads larger than this (default 25 MB) |
 
+## Command line
+
+```bash
+openmoderate scan ./uploads                      # files, folders (recursive) or URLs
+openmoderate scan ./uploads --json               # one JSON object per image
+openmoderate scan ./uploads --fail-on-violation  # exit code 1 if anything is flagged (CI, cron)
+openmoderate scan img.jpg -t weapons=0.3 --exclude alcohol tobacco
+openmoderate categories                          # list categories and thresholds
+openmoderate download                            # pre-fetch model weights for offline use
+```
+
+Exit codes for `scan`: `0` success, `1` something was flagged (only with `--fail-on-violation`), `2` some files could not be read.
+
+## Train on your own data
+
+Zero-shot works out of the box, but a head trained on *your* images is more accurate for your domain, and lets you add labels that are hard to describe in words.
+
+**1. Arrange images in folders.** One folder per label, plus `safe/` for acceptable images:
+
+```
+dataset/
+├── weapons/        # images that should be flagged as "weapons"
+├── counterfeit/    # a brand-new label of your own
+└── safe/           # a broad sample of your normal, acceptable traffic
+```
+
+An image that belongs to several labels can be copied into several folders.
+
+**2. Train** (CPU is fine; a few hundred images takes about a minute):
+
+```bash
+openmoderate train ./dataset -o my_head.omh
+```
+
+This prints precision and recall on a held-out split, then saves a head trained on all the images.
+
+**3. Use it:**
+
+```python
+mod = Moderator(head="my_head.omh")
+```
+
+```bash
+openmoderate scan ./uploads --head my_head.omh
+```
+
+Labels that exist in both the head and the zero-shot categories (like `weapons` above) use the trained score by default. Pass `head_weight=0.5` (or `--head-weight 0.5`) to blend the two. New labels (like `counterfeit`) are added to the results.
+
+**4. Evaluate** on a separate labelled folder that was not used for training:
+
+```bash
+openmoderate evaluate ./holdout --head my_head.omh
+openmoderate evaluate ./holdout                 # measure the zero-shot defaults on your data
+```
+
+> **The `safe/` folder matters most.** The head learns what is *not* a violation from it. In our tests, a `dog` head trained with only cats and city photos in `safe/` scored 100% on held-out validation, yet flagged 6 of 20 unrelated photos (people, a meeting, a boxing match) as dogs. After adding 24 varied everyday photos to `safe/`, it flagged none. Fill `safe/` with a broad, representative sample of the images your users actually upload, and evaluate on images from outside the training set.
+
+Heads are saved as `.omh` files: a NumPy archive with no pickle, so loading a head from someone else cannot run code.
+
 ## Accuracy and limitations
 
 Be honest with yourself about what zero-shot moderation can do:
@@ -119,14 +178,14 @@ Be honest with yourself about what zero-shot moderation can do:
 - Thresholds were tuned on a small hand-labelled set of public-domain images. The explicit-content categories could not be validated on real explicit images by the maintainers — **evaluate on a sample of your own traffic before relying on it**, and adjust thresholds.
 - For high-stakes moderation, use openmoderate as a first-pass filter and send borderline scores to human review.
 
-Fine-tuning on your own labelled data (v0.2) is the recommended way to get production-grade accuracy for your domain.
+[Training a head on your own labelled data](#train-on-your-own-data) is the recommended way to get production-grade accuracy for your domain.
 
 ## Roadmap
 
 | Version | Scope |
 |---|---|
 | **v0.1** | Core zero-shot engine + Python API ✅ |
-| v0.2 | `openmoderate` CLI (`scan`, `train`, `evaluate`) + fine-tuning on your own data |
+| **v0.2** | `openmoderate` CLI (`scan`, `train`, `evaluate`) + training on your own data ✅ |
 | v0.3 | REST API server (`openmoderate serve`) + Docker image |
 | v0.4 | Drop-in middleware for FastAPI, Flask and Django |
 | v0.5 | Video moderation (frame sampling, timestamped violations) |

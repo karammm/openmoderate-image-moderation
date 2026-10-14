@@ -24,8 +24,12 @@ jobs:
           pip install -e ".[dev]" pytest-github-actions-annotate-failures
       - name: Check the model stack imports (catches torch/torchvision mismatches)
         run: python -c "import open_clip, torchvision; print(open_clip.__version__, torchvision.__version__)"
-      - run: ruff check src tests
-      - run: ruff format --check src tests
+      - run: ruff check src tests scripts examples benchmark
+      - run: ruff format --check src tests scripts examples benchmark
+      - name: Type check
+        run: |
+          pip install "mypy>=1.10" types-PyYAML
+          mypy src/openmoderate --ignore-missing-imports
       - run: pytest -q
       - run: python -m build
 

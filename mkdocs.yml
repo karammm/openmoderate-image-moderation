@@ -1,0 +1,64 @@
+site_name: openmoderate
+site_description: Open-source, self-hosted image and video content moderation for Python.
+site_url: https://karammm.github.io/openmoderate-image-moderation/
+repo_url: https://github.com/karammm/openmoderate-image-moderation
+repo_name: karammm/openmoderate-image-moderation
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  features:
+    - content.code.copy
+    - navigation.sections
+    - navigation.top
+    - search.suggest
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: blue
+      toggle: {icon: material/brightness-7, name: Switch to dark mode}
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: blue
+      toggle: {icon: material/brightness-4, name: Switch to light mode}
+
+nav:
+  - Home: index.md
+  - Guide:
+      - How it works: guide/concepts.md
+      - Python API: guide/python.md
+      - Command line: guide/cli.md
+      - Train on your own data: guide/training.md
+      - Videos: guide/video.md
+      - Web framework integrations: guide/integrations.md
+      - REST API server: guide/server.md
+  - Benchmarks: benchmarks.md
+  - API reference: reference.md
+  - Security: security.md
+  - Changelog: changelog.md
+
+markdown_extensions:
+  - admonition
+  - tables
+  - toc: {permalink: true}
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.snippets:
+      base_path: ["."]
+      check_paths: true
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            show_source: false
+            show_root_heading: true
+            show_root_full_path: false
+            docstring_style: google
+            members_order: source
+            show_signature_annotations: true
+            separate_signature: true
+            filters: ["!^_"]

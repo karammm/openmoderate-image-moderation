@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import threading
+from typing import Any
 
 import numpy as np
 from PIL import Image
@@ -34,9 +35,10 @@ class ClipEngine:
         self.device = _resolve_device(device)
         self.cache_dir = cache_dir
         self.batch_size = batch_size
-        self._model = None
-        self._preprocess = None
-        self._tokenizer = None
+        # Loaded lazily on first use (open_clip has no type hints).
+        self._model: Any = None
+        self._preprocess: Any = None
+        self._tokenizer: Any = None
         self._lock = threading.Lock()
 
     def _ensure_loaded(self) -> None:

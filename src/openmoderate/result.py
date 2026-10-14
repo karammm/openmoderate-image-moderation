@@ -1,4 +1,4 @@
-"""Result types returned by :class:`openmoderate.Moderator`."""
+"""Result types returned by `openmoderate.Moderator`."""
 
 from __future__ import annotations
 

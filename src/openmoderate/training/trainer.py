@@ -1,4 +1,4 @@
-"""Train a :class:`LinearHead` on frozen image embeddings (no GPU required)."""
+"""Train a `LinearHead` on frozen image embeddings (no GPU required)."""
 
 from __future__ import annotations
 

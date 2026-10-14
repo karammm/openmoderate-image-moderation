@@ -13,10 +13,15 @@ license-files = ["LICENSE"]
 authors = [{ name = "openmoderate contributors" }]
 keywords = ["content-moderation", "nsfw", "computer-vision", "clip", "image-classification", "trust-and-safety"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Typing :: Typed",
     "Topic :: Scientific/Engineering :: Image Recognition",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
@@ -48,6 +53,8 @@ openmoderate = "openmoderate.cli:main"
 [project.urls]
 Homepage = "https://github.com/karammm/openmoderate-image-moderation"
 Issues = "https://github.com/karammm/openmoderate-image-moderation/issues"
+Documentation = "https://karammm.github.io/openmoderate-image-moderation/"
+Changelog = "https://github.com/karammm/openmoderate-image-moderation/blob/main/CHANGELOG.md"
 
 [tool.hatch.version]
 path = "src/openmoderate/__init__.py"

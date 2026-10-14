@@ -82,3 +82,14 @@ def test_benchmark_manifest_is_well_formed():
     )
     assert len({r["sha256"] for r in rows}) == len(rows)  # no duplicate images
     assert len({(r["label"], r["file"]) for r in rows}) == len(rows)
+
+
+def test_release_notes():
+    notes = load("scripts/release_notes.py", "release_notes")
+    text = "## [Unreleased]\n\n## [2.0.0] - x\n\n### Changed\n- big\n\n## [1.0.0] - y\n- old\n"
+    out = notes.notes("v2.0.0", "v1.0.0", text)
+    assert "pip install openmoderate==2.0.0" in out
+    assert "ghcr.io/karammm/openmoderate:2.0.0" in out
+    assert "### Changed\n- big" in out and "- old" not in out
+    assert "compare/v1.0.0...v2.0.0" in out
+    assert "commits/v2.0.0" in notes.notes("v2.0.0", None, text)

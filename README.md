@@ -40,6 +40,8 @@ Python 3.9+. The first call downloads the CLIP model weights (~600 MB) once; aft
 
 ## What you can do with it
 
+**Pick the accuracy you need** — `Moderator(preset="accurate")` uses a larger model: 82% recall with 4% of safe images flagged, versus 77% / 6.5% for the default ([benchmarks](https://karammm.github.io/openmoderate-image-moderation/benchmarks/#model-presets-v11)).
+
 **Tune the policy** — thresholds, categories and your own categories as plain text, no training data needed ([guide](https://karammm.github.io/openmoderate-image-moderation/guide/python/)):
 
 ```python
@@ -92,7 +94,7 @@ Measured on a held-out set of hand-reviewed, openly licensed photos ([full resul
 | `hate_symbols` | 61% | 100% |
 | `tobacco` | 59% | 89% |
 
-6% of safe images (including look-alikes such as kitchen knives, milk and medicine) were flagged. Sets are small, so read these as ±10 points. Nudity, sexual content, gore and self-harm are **not** benchmarked by the maintainers — evaluate them on your own data.
+6% of safe images (including look-alikes such as kitchen knives, milk and medicine) were flagged. The `accurate` preset raises average recall to 82% while flagging 4%. Sets are small, so read these as ±10 points. Nudity, sexual content, gore and self-harm are **not** benchmarked by the maintainers — evaluate them on your own data.
 
 Zero-shot moderation is good at clear-cut cases and will miss subtle ones. Evaluate on a sample of your own traffic, adjust thresholds, and send borderline scores to human review for high-stakes decisions. [How it works and its limits](https://karammm.github.io/openmoderate-image-moderation/guide/concepts/).
 

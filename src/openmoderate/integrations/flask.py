@@ -101,7 +101,8 @@ class OpenModerate:
     Args:
         app: The Flask app (or call `init_app` later).
         moderator: A ready `Moderator`; otherwise one is built lazily from the
-            ``OPENMODERATE_CONFIG`` / ``OPENMODERATE_HEAD`` app config keys.
+            ``OPENMODERATE_CONFIG`` / ``OPENMODERATE_HEAD`` / ``OPENMODERATE_PRESET`` app
+            config keys.
         check_all_requests: Moderate every uploaded file on every request.
         on_unreadable: What to do with uploads that are not images. Defaults to
             ``"allow"`` here, since a blanket check also sees PDFs, CSVs and so on.
@@ -130,11 +131,17 @@ class OpenModerate:
     def init_app(self, app: Flask) -> None:
         if self.moderator is not None:
             configure(self.moderator)
-        elif app.config.get("OPENMODERATE_CONFIG") or app.config.get("OPENMODERATE_HEAD"):
-            configure(
-                config=app.config.get("OPENMODERATE_CONFIG"),
-                head=app.config.get("OPENMODERATE_HEAD"),
-            )
+        elif any(
+            app.config.get(k)
+            for k in ("OPENMODERATE_CONFIG", "OPENMODERATE_HEAD", "OPENMODERATE_PRESET")
+        ):
+            kwargs = {
+                "config": app.config.get("OPENMODERATE_CONFIG"),
+                "head": app.config.get("OPENMODERATE_HEAD"),
+            }
+            if app.config.get("OPENMODERATE_PRESET") and not kwargs["config"]:
+                kwargs["preset"] = app.config["OPENMODERATE_PRESET"]
+            configure(**kwargs)
         app.extensions["openmoderate"] = self
         if self.check_all_requests:
             app.before_request(self._before_request)

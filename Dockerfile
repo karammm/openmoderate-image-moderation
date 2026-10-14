@@ -23,9 +23,14 @@ COPY pyproject.toml README.md LICENSE ./
 COPY src ./src
 RUN pip install ".[server,video]"
 
+# Model preset baked into the image: fast (default), balanced or accurate.
+#   docker build --build-arg OPENMODERATE_PRESET=accurate -t openmoderate:accurate .
+ARG OPENMODERATE_PRESET=fast
+ENV OPENMODERATE_PRESET=${OPENMODERATE_PRESET}
+
 RUN useradd --create-home --uid 1000 app && mkdir -p /models && chown app /models
 USER app
-RUN openmoderate download
+RUN openmoderate download --preset "$OPENMODERATE_PRESET"
 
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s \

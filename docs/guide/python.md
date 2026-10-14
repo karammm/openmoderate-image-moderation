@@ -23,6 +23,24 @@ result.to_dict()         # JSON-serialisable
 ```
 
 
+## Choosing a model preset
+
+```python
+mod = Moderator(preset="accurate")   # "fast" (default), "balanced" or "accurate"
+```
+
+| Preset | Model | Recall | Safe images flagged | CPU per image |
+|---|---|---:|---:|---:|
+| `fast` | ViT-B/32 | 77% | 6.5% | 10 ms |
+| `balanced` | ViT-B/16 | 77% | 4.7% | 32 ms |
+| `accurate` | ViT-L/14 | 82% | 4.2% | 129 ms |
+
+`accurate` catches the most and flags the fewest safe images; `fast` is the cheapest. Each
+preset downloads its own weights on first use. See [benchmarks](../benchmarks.md) for the
+per-category numbers. You can also set a preset in a policy file (`preset: accurate`) or with
+the `OPENMODERATE_PRESET` environment variable. A trained head only works with the model it was
+trained on.
+
 ## Tuning your policy
 
 ```python

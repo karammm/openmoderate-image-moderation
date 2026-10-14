@@ -4,6 +4,11 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+### Added
+- README infographic (`docs/assets/how-it-works.svg`) and animated terminal demo
+  (`docs/assets/demo.svg`), both following GitHub's light/dark theme. Regenerate with
+  `python scripts/make_readme_graphics.py`.
+
 ## [0.3.0] - 2026-10-14
 
 ### Added

@@ -1,0 +1,14 @@
+# Example moderation policy. Load with: Moderator("examples/policy.yaml")
+thresholds:
+  weapons: 0.4
+  suggestive: 0.8
+disabled: [alcohol, tobacco]
+custom_categories:
+  - name: gambling
+    prompts:
+      - "a casino slot machine"
+      - "people gambling at a poker table with chips"
+    negatives:
+      - "people playing a board game"
+    threshold: 0.5
+    parent: gambling

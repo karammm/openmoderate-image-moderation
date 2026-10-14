@@ -30,12 +30,15 @@ dependencies = [
 
 [project.optional-dependencies]
 server = ["fastapi>=0.110", "uvicorn[standard]>=0.29", "python-multipart>=0.0.9"]
+fastapi = ["fastapi>=0.110", "python-multipart>=0.0.9"]
+flask = ["flask>=2.2"]
+django = ["django>=4.2"]
 dev = [
     "pytest>=7",
     "ruff>=0.4",
     "build>=1.0",
     "httpx>=0.27",
-    "openmoderate[server]",
+    "openmoderate[server,flask,django]",
 ]
 
 [project.scripts]

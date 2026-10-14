@@ -51,3 +51,29 @@ def fake_engine():
             (0, 0, 255): "a nazi swastika flag",
         }
     )
+
+
+class ColorEngine(FakeEngine):
+    """Image embedding = normalised mean RGB colour (padded), so colours are learnable."""
+
+    def encode_images(self, images):
+        out = []
+        for im in images:
+            v = np.zeros(DIM)
+            v[:3] = np.asarray(im, dtype=float).reshape(-1, 3).mean(axis=0) / 255.0
+            v[3] = 0.2
+            out.append(v / np.linalg.norm(v))
+        return np.stack(out)
+
+
+def make_dataset(root, n=12, seed=0):
+    """root/weapons (reddish), root/drugs (bluish), root/safe (greenish)."""
+    rng = np.random.default_rng(seed)
+    bases = {"weapons": (220, 30, 30), "drugs": (30, 30, 220), "safe": (30, 200, 30)}
+    for label, base in bases.items():
+        folder = root / label
+        folder.mkdir(parents=True)
+        for i in range(n):
+            color = tuple(int(np.clip(c + rng.integers(-25, 25), 0, 255)) for c in base)
+            solid(color).save(folder / f"{i}.png")
+    return root

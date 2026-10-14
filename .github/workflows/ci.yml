@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, "release/**"]
   pull_request:
 
 jobs:
@@ -26,3 +26,22 @@ jobs:
       - run: ruff format --check src tests
       - run: pytest -q
       - run: python -m build
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t openmoderate:ci .
+      - name: Smoke test the container
+        run: |
+          docker run -d --name om -p 8000:8000 -e OPENMODERATE_API_KEY=ci-key openmoderate:ci
+          for i in $(seq 1 60); do curl -sf localhost:8000/health && break; sleep 2; done
+          curl -sf localhost:8000/health | grep '"model_loaded":true'
+          python3 -c "import zlib,struct; raw=b''.join(b'\x00'+b'\x40\x90\xd0'*64 for _ in range(64)); c=lambda t,d: struct.pack('>I',len(d))+t+d+struct.pack('>I',zlib.crc32(t+d)); open('blue.png','wb').write(b'\x89PNG\r\n\x1a\n'+c(b'IHDR',struct.pack('>IIBBBBB',64,64,8,2,0,0,0))+c(b'IDAT',zlib.compress(raw))+c(b'IEND',b''))"
+          test "$(curl -s -o /dev/null -w '%{http_code}' -F file=@blue.png localhost:8000/v1/moderate)" = 401
+          curl -sf -H 'X-API-Key: ci-key' -F file=@blue.png localhost:8000/v1/moderate | tee out.json
+          grep '"is_safe":true' out.json
+      - name: Container logs
+        if: always()
+        run: docker logs om || true

@@ -29,7 +29,14 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=7", "ruff>=0.4", "build>=1.0"]
+server = ["fastapi>=0.110", "uvicorn[standard]>=0.29", "python-multipart>=0.0.9"]
+dev = [
+    "pytest>=7",
+    "ruff>=0.4",
+    "build>=1.0",
+    "httpx>=0.27",
+    "openmoderate[server]",
+]
 
 [project.scripts]
 openmoderate = "openmoderate.cli:main"

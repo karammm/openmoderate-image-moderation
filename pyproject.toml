@@ -31,6 +31,9 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest>=7", "ruff>=0.4", "build>=1.0"]
 
+[project.scripts]
+openmoderate = "openmoderate.cli:main"
+
 [project.urls]
 Homepage = "https://github.com/karammm/openmoderate-image-moderation"
 Issues = "https://github.com/karammm/openmoderate-image-moderation/issues"

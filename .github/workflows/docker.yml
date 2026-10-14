@@ -1,0 +1,90 @@
+name: Docker image
+
+# Publishes ghcr.io/<owner>/openmoderate:<version>, :<major>.<minor> and :latest.
+# Runs on every version tag; run it manually ("Run workflow") to (re)publish an existing tag.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to publish, e.g. v1.0.0"
+        required: true
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REF: ${{ inputs.tag || github.ref_name }}
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.REF }}
+
+      - name: Read the package version
+        id: version
+        run: |
+          version=$(python3 -c "import re; print(re.search(r'__version__ = \"(.+?)\"', open('src/openmoderate/__init__.py').read()).group(1))")
+          if [ "v$version" != "$REF" ]; then
+            echo "::error::Tag $REF does not match package version $version"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "minor=${version%.*}" >> "$GITHUB_OUTPUT"
+
+      - id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/openmoderate
+          tags: |
+            type=raw,value=${{ steps.version.outputs.version }}
+            type=raw,value=${{ steps.version.outputs.minor }}
+            type=raw,value=latest
+          labels: |
+            org.opencontainers.image.title=openmoderate
+            org.opencontainers.image.description=Open-source, self-hosted image and video content moderation REST API
+            org.opencontainers.image.licenses=Apache-2.0
+            org.opencontainers.image.version=${{ steps.version.outputs.version }}
+
+      - uses: docker/setup-buildx-action@v4
+
+      - name: Build
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          load: true
+          tags: openmoderate:test
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Smoke test the image before publishing
+        run: |
+          docker run -d --name om -p 8000:8000 -e OPENMODERATE_API_KEY=ci-key openmoderate:test
+          for i in $(seq 1 60); do curl -sf localhost:8000/health && break; sleep 2; done
+          curl -sf localhost:8000/health | grep '"model_loaded":true'
+          docker exec om python -c "from PIL import Image; Image.new('RGB', (64, 64), (64, 144, 208)).save('/tmp/blue.png')"
+          docker cp om:/tmp/blue.png blue.png
+          curl -sf -H 'X-API-Key: ci-key' -F file=@blue.png localhost:8000/v1/moderate | grep '"is_safe":true'
+          docker rm -f om
+
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Publish
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha

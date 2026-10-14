@@ -7,12 +7,13 @@ pip install "openmoderate[server]"
 OPENMODERATE_API_KEY=change-me openmoderate serve --host 0.0.0.0 --port 8000
 ```
 
-Or with Docker (model weights are baked into the image, so it runs offline):
+Or with the published Docker image (CPU, model weights included, so it runs offline):
 
 ```bash
-docker build -t openmoderate .
-docker run -p 8000:8000 -e OPENMODERATE_API_KEY=change-me openmoderate
+docker run -p 8000:8000 -e OPENMODERATE_API_KEY=change-me ghcr.io/karammm/openmoderate:latest
 ```
+
+Pin a version (`ghcr.io/karammm/openmoderate:1.0.0` or `:1.0`) in production. To build it yourself: `docker build -t openmoderate .` from a checkout.
 
 Interactive API docs are served at `http://localhost:8000/docs`.
 

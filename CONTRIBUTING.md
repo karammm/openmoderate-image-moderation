@@ -35,8 +35,10 @@ pytest -m slow            # smoke test against the real CLIP model (~600 MB down
 3. Tag and push: `git tag -a vX.Y.Z -m "vX.Y.Z" && git push origin vX.Y.Z`.
 
 The `Release` workflow then checks the tag matches `__version__`, builds the package,
-creates the GitHub release with the changelog section as notes (attaching the wheel and
-sdist), and backfills release pages for any older tags that lack one.
+creates the GitHub release (install instructions, the changelog section and links, with
+the wheel and sdist attached), backfills release pages for older tags, and publishes to
+PyPI. The `Docker image` workflow smoke-tests the server image and publishes it to
+`ghcr.io/karammm/openmoderate` as `X.Y.Z`, `X.Y` and `latest`.
 
 ### One-time setup
 
@@ -53,6 +55,10 @@ sdist), and backfills release pages for any older tags that lack one.
 **Docs site:** in the GitHub repo, *Settings → Pages → Build and deployment → Source*,
 choose **GitHub Actions**, then add the repository variable `DOCS_DEPLOY` = `true`. The
 `Docs` workflow then deploys on every push to `main` (re-run it once to publish now).
+
+**Social preview:** upload `docs/assets/social-preview.png` under *Settings → General →
+Social preview* (GitHub has no API for this). Regenerate it with
+`python scripts/make_readme_graphics.py` and a headless browser screenshot of the SVG.
 
 ## Benchmark
 

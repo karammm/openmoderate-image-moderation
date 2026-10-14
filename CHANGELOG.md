@@ -4,6 +4,17 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-14
+
+### Added
+- `openmoderate` command-line tool with `scan`, `train`, `evaluate`, `categories` and `download` commands.
+- `scan` supports files, recursive folders and URLs, JSON-lines output, policy flags and `--fail-on-violation` for CI.
+- Training on your own data: folder datasets (`dataset/<label>/`, `safe/`), a class-balanced linear head on frozen CLIP embeddings, held-out precision/recall/F1, then a refit on all data.
+- `Moderator(head=..., head_weight=...)` adds trained labels and blends them with zero-shot categories.
+- `.omh` head format (NumPy archive plus JSON metadata, no pickle), with a check that the head's model matches the moderator's.
+- `Moderator.label_specs` and `Moderator.thresholds` properties.
+- `train` warns when the `safe/` folder is too small to teach the head what normal traffic looks like.
+
 ## [0.1.0] - 2026-10-14
 
 ### Added

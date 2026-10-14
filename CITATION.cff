@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use openmoderate in research or a product evaluation, please cite it as below."
+title: "openmoderate: open-source, self-hosted image and video content moderation"
+type: software
+authors:
+  - name: "openmoderate contributors"
+repository-code: "https://github.com/karammm/openmoderate-image-moderation"
+url: "https://karammm.github.io/openmoderate-image-moderation/"
+license: Apache-2.0
+version: 1.0.0
+date-released: "2026-10-14"
+keywords:
+  - content moderation
+  - trust and safety
+  - computer vision
+  - CLIP
+  - zero-shot classification

@@ -375,8 +375,52 @@ def demo() -> str:
     return "\n".join(parts)
 
 
+def social_preview() -> str:
+    """1280x640 card for GitHub's social preview (render to PNG and upload in Settings)."""
+    W, H = 1280, 640
+    chips = ["nudity", "violence", "weapons", "hate symbols", "drugs", "alcohol", "tobacco"]
+    parts = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}">',
+        "<defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>"
+        "<stop offset='0' stop-color='#0d1117'/><stop offset='1' stop-color='#102a4c'/>"
+        "</linearGradient></defs>",
+        f'<rect width="{W}" height="{H}" fill="url(#g)"/>',
+        "<g font-family=\"-apple-system, BlinkMacSystemFont, 'Segoe UI', "
+        'Helvetica, Arial, sans-serif">',
+        '<text x="80" y="200" font-size="92" font-weight="700" fill="#e6edf3">openmoderate</text>',
+        '<text x="80" y="270" font-size="38" fill="#9198a1">'
+        "Open-source image &amp; video content moderation</text>",
+        '<text x="80" y="320" font-size="38" fill="#9198a1">'
+        "for Python. Self-hosted. No per-image fees.</text>",
+    ]
+    x = 80
+    for chip in chips:
+        w = text_width(chip, 26) + 44
+        parts.append(
+            f'<rect x="{x}" y="380" width="{w}" height="50" rx="25" fill="#161b22" '
+            'stroke="#30363d" stroke-width="2"/>'
+        )
+        parts.append(
+            f'<text x="{x + w / 2}" y="414" font-size="26" fill="#e6edf3" '
+            f'text-anchor="middle">{escape(chip)}</text>'
+        )
+        x += w + 14
+    parts += [
+        '<rect x="80" y="480" width="560" height="74" rx="12" fill="#010409" stroke="#30363d"/>',
+        '<text x="110" y="528" font-size="32" fill="#e6edf3" '
+        'font-family="ui-monospace, SFMono-Regular, Menlo, monospace">'
+        '<tspan fill="#4493f8">$</tspan> pip install openmoderate</text>',
+        "</g>",
+        "</svg>",
+    ]
+    return "\n".join(parts)
+
+
 if __name__ == "__main__":
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "how-it-works.svg").write_text(infographic(), encoding="utf-8")
     (OUT / "demo.svg").write_text(demo(), encoding="utf-8")
+    # Rendered to social-preview.png with a headless browser; upload it under
+    # Settings -> General -> Social preview (GitHub has no API for this).
+    (OUT / "social-preview.svg").write_text(social_preview(), encoding="utf-8")
     print(f"Wrote {OUT / 'how-it-works.svg'} and {OUT / 'demo.svg'}")

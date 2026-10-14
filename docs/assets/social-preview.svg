@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640">
+<defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#0d1117'/><stop offset='1' stop-color='#102a4c'/></linearGradient></defs>
+<rect width="1280" height="640" fill="url(#g)"/>
+<g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+<text x="80" y="200" font-size="92" font-weight="700" fill="#e6edf3">openmoderate</text>
+<text x="80" y="270" font-size="38" fill="#9198a1">Open-source image &amp; video content moderation</text>
+<text x="80" y="320" font-size="38" fill="#9198a1">for Python. Self-hosted. No per-image fees.</text>
+<rect x="80" y="380" width="125.12" height="50" rx="25" fill="#161b22" stroke="#30363d" stroke-width="2"/>
+<text x="142.56" y="414" font-size="26" fill="#e6edf3" text-anchor="middle">nudity</text>
+<rect x="219.12" y="380" width="152.16" height="50" rx="25" fill="#161b22" stroke="#30363d" stroke-width="2"/>
+<text x="295.2" y="414" font-size="26" fill="#e6edf3" text-anchor="middle">violence</text>
+<rect x="385.28" y="380" width="138.64" height="50" rx="25" fill="#161b22" stroke="#30363d" stroke-width="2"/>
+<text x="454.59999999999997" y="414" font-size="26" fill="#e6edf3" text-anchor="middle">weapons</text>
+<rect x="537.92" y="380" width="206.24" height="50" rx="25" fill="#161b22" stroke="#30363d" stroke-width="2"/>
+<text x="641.04" y="414" font-size="26" fill="#e6edf3" text-anchor="middle">hate symbols</text>
+<rect x="758.16" y="380" width="111.60000000000001" height="50" rx="25" fill="#161b22" stroke="#30363d" stroke-width="2"/>
+<text x="813.9599999999999" y="414" font-size="26" fill="#e6edf3" text-anchor="middle">drugs</text>
+<rect x="883.76" y="380" width="138.64" height="50" rx="25" fill="#161b22" stroke="#30363d" stroke-width="2"/>
+<text x="953.0799999999999" y="414" font-size="26" fill="#e6edf3" text-anchor="middle">alcohol</text>
+<rect x="1036.4" y="380" width="138.64" height="50" rx="25" fill="#161b22" stroke="#30363d" stroke-width="2"/>
+<text x="1105.72" y="414" font-size="26" fill="#e6edf3" text-anchor="middle">tobacco</text>
+<rect x="80" y="480" width="560" height="74" rx="12" fill="#010409" stroke="#30363d"/>
+<text x="110" y="528" font-size="32" fill="#e6edf3" font-family="ui-monospace, SFMono-Regular, Menlo, monospace"><tspan fill="#4493f8">$</tspan> pip install openmoderate</text>
+</g>
+</svg>

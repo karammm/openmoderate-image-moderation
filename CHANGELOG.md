@@ -4,6 +4,17 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+### Added
+- Docker image published to `ghcr.io/karammm/openmoderate` on every release, smoke-tested
+  before it is pushed.
+- Release pages now start with copy-paste install commands and link to the docs,
+  benchmarks and the full diff.
+- README badges, `CITATION.cff`, `CODE_OF_CONDUCT.md`, Dependabot updates and a social
+  preview card.
+
+### Changed
+- GitHub Actions updated to their current major versions.
+
 ## [1.0.0] - 2026-10-14
 
 First stable release. The public API (everything importable from `openmoderate`, the

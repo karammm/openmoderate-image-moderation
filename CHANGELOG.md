@@ -4,10 +4,27 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-14
+
 ### Added
+- Framework integrations under `openmoderate.integrations`:
+  - FastAPI: `ModeratedFile` / `ModeratedFiles` and `moderated()` / `moderated_files()`
+    dependencies, with moderation off the event loop.
+  - Flask: `@moderate_uploads(...)` decorator and an `OpenModerate` extension that can check
+    every request.
+  - Django: `ModerationValidator` (models, forms, admin, DRF; migration-safe) and
+    `ModerationMiddleware` for URL prefixes, configured via `settings.OPENMODERATE`.
+- One shared model per process; per-endpoint policies reuse it instead of loading another copy.
+- Uploads are rewound after checking so applications can save them normally.
+- Error responses hide confidence scores by default (`include_scores=True` to show them).
+- Extras: `openmoderate[fastapi]`, `[flask]`, `[django]`; runnable example apps for each.
 - README infographic (`docs/assets/how-it-works.svg`) and animated terminal demo
   (`docs/assets/demo.svg`), both following GitHub's light/dark theme. Regenerate with
   `python scripts/make_readme_graphics.py`.
+
+### Changed
+- The test suite's fake engine uses exactly orthogonal text vectors, making multi-label
+  assertions deterministic.
 
 ## [0.3.0] - 2026-10-14
 

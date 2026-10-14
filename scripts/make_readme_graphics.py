@@ -17,7 +17,7 @@ ROADMAP = [
     ("v0.1", "Core engine", True),
     ("v0.2", "CLI + training", True),
     ("v0.3", "REST API + Docker", True),
-    ("v0.4", "Framework middleware", False),
+    ("v0.4", "Framework middleware", True),
     ("v0.5", "Video", False),
     ("v1.0", "Stable release", False),
 ]
@@ -208,8 +208,14 @@ def infographic() -> str:
         for j, (line, cls) in enumerate(lines):
             parts.append(t(x + 18, ctop + 64 + j * 22, line, 13, cls=f"mono {cls}".strip()))
 
+    parts.append(
+        f'<text x="{L}" y="{ctop + ch + 30}" font-size="14" class="muted">'
+        "Plus drop-in upload protection for FastAPI, Flask and Django:  "
+        '<tspan class="mono" style="fill: var(--text)">file: ModeratedFile</tspan></text>'
+    )
+
     # --- Categories -------------------------------------------------------------------
-    y1 = ctop + ch + 52
+    y1 = ctop + ch + 80
     parts.append(t(L, y1, "DETECTS OUT OF THE BOX", cls="label"))
     x, y = L, y1 + 18
     chips = [name for name, _ in CATEGORIES] + ["+ your own categories"]

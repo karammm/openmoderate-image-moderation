@@ -1,36 +1,89 @@
 name: Release
 
-# Push a version tag (git tag v1.2.3 && git push --tags) to:
-#   1. check the tag matches the package version,
+# Releases happen automatically when a commit on main bumps __version__ and CI passes on it:
+#   1. tag the commit vX.Y.Z (skipped when that tag already exists, i.e. nothing to release),
 #   2. build the sdist and wheel,
-#   3. create the GitHub release with notes from CHANGELOG.md (and backfill release pages
-#      for any older tags that lack one),
-#   4. publish to PyPI through trusted publishing (no tokens stored in the repository).
+#   3. create the GitHub release (install commands, CHANGELOG section, links) and backfill
+#      release pages for older tags,
+#   4. publish to PyPI through trusted publishing (no tokens stored in the repository),
+#   5. smoke-test and publish the Docker image to ghcr.io.
+# Pushing a vX.Y.Z tag by hand runs the same pipeline for that tag.
 
 on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
   push:
     tags: ["v*"]
 
 permissions:
   contents: read
 
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 jobs:
-  build:
+  check:
+    # Only after a green CI run on main (or for a hand-pushed tag).
+    if: github.event_name == 'push' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # to push the release tag
+    outputs:
+      release: ${{ steps.decide.outputs.release }}
+      tag: ${{ steps.decide.outputs.tag }}
+      version: ${{ steps.decide.outputs.version }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 0
       - uses: actions/setup-python@v7
         with:
           python-version: "3.11"
-      - name: Check the tag matches the package version
+      - name: Decide whether this commit is a new release
+        id: decide
         run: |
           version=$(python -c "import re; print(re.search(r'__version__ = \"(.+?)\"', open('src/openmoderate/__init__.py').read()).group(1))")
-          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
-            echo "::error::Tag $GITHUB_REF_NAME does not match package version $version"
-            exit 1
+          tag="v$version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          if [ "$GITHUB_EVENT_NAME" = "push" ]; then
+            if [ "$GITHUB_REF_NAME" != "$tag" ]; then
+              echo "::error::Tag $GITHUB_REF_NAME does not match package version $version"
+              exit 1
+            fi
+            echo "release=true" >> "$GITHUB_OUTPUT"
+          elif git ls-remote --exit-code --tags origin "refs/tags/$tag" > /dev/null; then
+            echo "$tag already exists: nothing to release."
+            echo "release=false" >> "$GITHUB_OUTPUT"
+          else
+            python scripts/changelog_section.py "$tag" > /dev/null
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git tag -a "$tag" -m "$tag"
+            git push origin "$tag"
+            echo "Tagged $tag"
+            echo "release=true" >> "$GITHUB_OUTPUT"
           fi
+
+  build:
+    needs: check
+    if: needs.check.outputs.release == 'true'
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ needs.check.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.check.outputs.tag }}
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
       - name: Check the changelog has an entry for this version
-        run: python scripts/changelog_section.py "$GITHUB_REF_NAME" > /dev/null
+        run: python scripts/changelog_section.py "$TAG" > /dev/null
       - run: pip install build && python -m build
       - uses: actions/upload-artifact@v7
         with:
@@ -38,15 +91,17 @@ jobs:
           path: dist/
 
   github-release:
-    needs: build
+    needs: [check, build]
     runs-on: ubuntu-latest
     permissions:
       contents: write
     env:
       GH_TOKEN: ${{ github.token }}
+      TAG: ${{ needs.check.outputs.tag }}
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: ${{ needs.check.outputs.tag }}
           fetch-depth: 0
       - uses: actions/download-artifact@v8
         with:
@@ -54,17 +109,17 @@ jobs:
           path: dist/
       - name: Create the release for this tag
         run: |
-          python scripts/release_notes.py "$GITHUB_REF_NAME" > notes.md
-          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
-            gh release upload "$GITHUB_REF_NAME" dist/* --clobber
-            gh release edit "$GITHUB_REF_NAME" --notes-file notes.md
+          python scripts/release_notes.py "$TAG" > notes.md
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            gh release upload "$TAG" dist/* --clobber
+            gh release edit "$TAG" --notes-file notes.md
           else
-            gh release create "$GITHUB_REF_NAME" dist/* --title "$GITHUB_REF_NAME" --notes-file notes.md --verify-tag
+            gh release create "$TAG" dist/* --title "$TAG" --notes-file notes.md --verify-tag
           fi
       - name: Backfill release pages for older tags
         run: |
           for tag in $(git tag --list 'v*' --sort=version:refname); do
-            [ "$tag" = "$GITHUB_REF_NAME" ] && continue
+            [ "$tag" = "$TAG" ] && continue
             gh release view "$tag" > /dev/null 2>&1 && continue
             python scripts/changelog_section.py "$tag" > old.md || continue
             gh release create "$tag" --title "$tag" --notes-file old.md --verify-tag --latest=false
@@ -82,3 +137,61 @@ jobs:
           name: dist
           path: dist/
       - uses: pypa/gh-action-pypi-publish@release/v1
+
+  docker:
+    needs: [check, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      VERSION: ${{ needs.check.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.check.outputs.tag }}
+      - id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/openmoderate
+          tags: |
+            type=raw,value=${{ needs.check.outputs.version }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ needs.check.outputs.version }}
+            type=raw,value=latest
+          labels: |
+            org.opencontainers.image.title=openmoderate
+            org.opencontainers.image.description=Open-source, self-hosted image and video content moderation REST API
+            org.opencontainers.image.licenses=Apache-2.0
+            org.opencontainers.image.version=${{ needs.check.outputs.version }}
+      - uses: docker/setup-buildx-action@v4
+      - name: Build
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          load: true
+          tags: openmoderate:test
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Smoke test the image before publishing
+        run: |
+          docker run -d --name om -p 8000:8000 -e OPENMODERATE_API_KEY=ci-key openmoderate:test
+          for i in $(seq 1 60); do curl -sf localhost:8000/health && break; sleep 2; done
+          curl -sf localhost:8000/health | grep '"model_loaded":true'
+          docker exec om python -c "from PIL import Image; Image.new('RGB', (64, 64), (64, 144, 208)).save('/tmp/blue.png')"
+          docker cp om:/tmp/blue.png blue.png
+          curl -sf -H 'X-API-Key: ci-key' -F file=@blue.png localhost:8000/v1/moderate | grep '"is_safe":true'
+          docker rm -f om
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - name: Publish
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha

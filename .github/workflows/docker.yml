@@ -1,11 +1,9 @@
 name: Docker image
 
-# Publishes ghcr.io/<owner>/openmoderate:<version>, :<major>.<minor> and :latest.
-# Runs on every version tag; run it manually ("Run workflow") to (re)publish an existing tag.
+# Re-publishes ghcr.io/<owner>/openmoderate for an existing tag ("Run workflow").
+# New releases publish their image from release.yml automatically.
 
 on:
-  push:
-    tags: ["v*"]
   workflow_dispatch:
     inputs:
       tag:
@@ -17,7 +15,7 @@ permissions:
   packages: write
 
 env:
-  REF: ${{ inputs.tag || github.ref_name }}
+  REF: ${{ inputs.tag }}
 
 jobs:
   publish:

@@ -31,14 +31,14 @@ pytest -m slow            # smoke test against the real CLIP model (~600 MB down
 
 1. Bump `__version__` in `src/openmoderate/__init__.py` and move the "Unreleased" notes in
    `CHANGELOG.md` under a new `## [X.Y.Z] - YYYY-MM-DD` heading.
-2. Merge to `main` once CI is green.
-3. Tag and push: `git tag -a vX.Y.Z -m "vX.Y.Z" && git push origin vX.Y.Z`.
+2. Merge to `main`.
 
-The `Release` workflow then checks the tag matches `__version__`, builds the package,
-creates the GitHub release (install instructions, the changelog section and links, with
-the wheel and sdist attached), backfills release pages for older tags, and publishes to
-PyPI. The `Docker image` workflow smoke-tests the server image and publishes it to
-`ghcr.io/karammm/openmoderate` as `X.Y.Z`, `X.Y` and `latest`.
+That's all. When CI passes on a commit whose version has no tag yet, the `Release`
+workflow tags it `vX.Y.Z`, builds the package, creates the GitHub release (install
+commands, the changelog section and links, with the wheel and sdist attached), publishes
+to PyPI, and smoke-tests and publishes the Docker image to `ghcr.io/karammm/openmoderate`
+as `X.Y.Z`, `X.Y` and `latest`. If CI fails, nothing is released. Pushing a `vX.Y.Z` tag
+by hand runs the same pipeline.
 
 ### One-time setup
 

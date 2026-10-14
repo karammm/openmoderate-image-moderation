@@ -34,7 +34,7 @@ def _read_url(url: str) -> bytes:
 
 
 def load_image(source: ImageInput) -> Image.Image:
-    """Return an RGB :class:`PIL.Image.Image` from a path, URL, bytes, file object or PIL image."""
+    """Return an RGB `PIL.Image.Image` from a path, URL, bytes, file object or PIL image."""
     try:
         if isinstance(source, Image.Image):
             img = source

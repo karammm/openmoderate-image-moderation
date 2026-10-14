@@ -19,7 +19,7 @@ ROADMAP = [
     ("v0.3", "REST API + Docker", True),
     ("v0.4", "Framework middleware", True),
     ("v0.5", "Video", True),
-    ("v1.0", "Stable release", False),
+    ("v1.0", "Stable release", True),
 ]
 
 CATEGORIES = [

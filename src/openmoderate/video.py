@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import os
 import tempfile
-from collections.abc import Iterator
+from collections.abc import Generator, Iterator
 from contextlib import contextmanager
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -91,7 +91,7 @@ def iter_frames(
     max_frames: int | None = None,
     max_duration: float | None = None,
     info: VideoInfo | None = None,
-) -> Iterator[tuple[float, Image.Image]]:
+) -> Generator[tuple[float, Image.Image], None, None]:
     """Yield ``(timestamp_seconds, RGB image)`` sampled at roughly ``fps`` frames per second.
 
     The first frame is always included. Fills ``info`` (if given) as decoding proceeds.
@@ -252,7 +252,7 @@ def analyze_video(
     batch_size: int = 16,
     keep_frame_scores: bool = False,
 ) -> VideoModerationResult:
-    """Implementation of :meth:`openmoderate.Moderator.analyze_video`."""
+    """Implementation of `openmoderate.Moderator.analyze_video`."""
     specs = moderator.label_specs
     names = [s.name for s in specs]
     parents = [s.parent for s in specs]

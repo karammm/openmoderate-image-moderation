@@ -1,28 +1,35 @@
 """Django integration: a field validator and a middleware.
 
-Validator (works in model fields, forms, the admin and Django REST Framework serializers)::
+Validator (works in model fields, forms, the admin and Django REST Framework serializers):
 
-    from openmoderate.integrations.django import ModerationValidator
+```python
+from openmoderate.integrations.django import ModerationValidator
 
-    class Profile(models.Model):
-        avatar = models.ImageField(validators=[ModerationValidator()])
-        banner = models.ImageField(validators=[ModerationValidator(thresholds={"suggestive": 0.4})])
+class Profile(models.Model):
+    avatar = models.ImageField(validators=[ModerationValidator()])
+    banner = models.ImageField(validators=[ModerationValidator(thresholds={"suggestive": 0.4})])
+```
 
-Middleware (moderates every uploaded file under the configured URL prefixes)::
+Middleware (moderates every uploaded file under the configured URL prefixes):
 
-    MIDDLEWARE = [..., "openmoderate.integrations.django.ModerationMiddleware"]
+```python
+MIDDLEWARE = [..., "openmoderate.integrations.django.ModerationMiddleware"]
+```
 
-Settings, all optional::
+Settings, all optional:
 
-    OPENMODERATE = {
-        "CONFIG": BASE_DIR / "policy.yaml",   # policy YAML
-        "HEAD": BASE_DIR / "my_head.omh",     # trained head
-        "DEVICE": "auto",
-        "PATHS": ["/uploads/", "/api/"],      # middleware only; default: every path
-        "ON_UNREADABLE": "allow",            # middleware: non-image files pass through
-        "STATUS_CODE": 422,
-        "INCLUDE_SCORES": False,
-    }
+```python
+OPENMODERATE = {
+    "CONFIG": BASE_DIR / "policy.yaml",   # policy YAML
+    "HEAD": BASE_DIR / "my_head.omh",     # trained head
+    "DEVICE": "auto",
+    "PATHS": ["/uploads/", "/api/"],      # middleware only; default: every path
+    "ON_UNREADABLE": "allow",            # middleware: non-image files pass through
+    "STATUS_CODE": 422,
+    "INCLUDE_SCORES": False,
+}
+```
+
 """
 
 from __future__ import annotations
@@ -62,7 +69,7 @@ def _ensure_configured() -> None:
     if is_configured():
         return
     opts = _settings()
-    kwargs = {}
+    kwargs: dict[str, Any] = {}
     if opts.get("CONFIG"):
         kwargs["config"] = str(opts["CONFIG"])
     if opts.get("HEAD"):
@@ -81,11 +88,16 @@ def _stream(value: Any):
 class ModerationValidator:
     """Reject images that violate the moderation policy.
 
+    Policy overrides apply to this field only and reuse the shared model, so they cost no
+    extra memory.
+
     Args:
-        thresholds / categories / exclude: Policy overrides for this field only. They reuse
-            the shared model, so they cost no extra memory.
+        thresholds: Per-category threshold overrides, e.g. ``{"suggestive": 0.4}``.
+        categories: Only check these categories.
+        exclude: Skip these categories.
         on_unreadable: ``"reject"`` (default) or ``"allow"`` files that are not images.
         message: Error shown to the user; ``%(violations)s`` is replaced with the names.
+        max_bytes: Reject files larger than this.
     """
 
     message = "This image was rejected by content moderation (%(violations)s)."

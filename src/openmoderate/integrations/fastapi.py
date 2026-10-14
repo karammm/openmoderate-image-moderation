@@ -1,19 +1,19 @@
 """FastAPI integration: reject violating image uploads before your endpoint runs.
 
-::
+```python
+from fastapi import FastAPI, UploadFile
+from openmoderate.integrations.fastapi import ModeratedFile, moderated
 
-    from fastapi import FastAPI, UploadFile
-    from openmoderate.integrations.fastapi import ModeratedFile, moderated
+app = FastAPI()
 
-    app = FastAPI()
+@app.post("/avatar")
+async def avatar(file: ModeratedFile):          # form field "file"
+    ...                                          # only safe images get here
 
-    @app.post("/avatar")
-    async def avatar(file: ModeratedFile):          # form field "file"
-        ...                                          # only safe images get here
-
-    @app.post("/photos")
-    async def photos(photo: UploadFile = moderated("photo", thresholds={"weapons": 0.3})):
-        ...
+@app.post("/photos")
+async def photos(photo: UploadFile = moderated("photo", thresholds={"weapons": 0.3})):
+    ...
+```
 
 Violating images get a ``422`` response (``413`` if too large) and the endpoint never runs.
 Moderation runs in a worker thread, so it does not block the event loop.
@@ -70,7 +70,7 @@ async def _check(
 
 
 def _make_dependency(field: str, many: bool, check_kwargs: dict[str, Any]):
-    annotation = Annotated[list[UploadFile] if many else UploadFile, File()]
+    annotation: Any = Annotated[list[UploadFile], File()] if many else Annotated[UploadFile, File()]
 
     async def dependency(**kwargs: Any):
         value = kwargs[field]
@@ -151,7 +151,7 @@ def moderated_files(
     include_scores: bool = False,
     max_bytes: int = MAX_BYTES,
 ) -> Any:
-    """Like :func:`moderated` for a repeated field (``list[UploadFile]``); every file must pass."""
+    """Like `moderated` for a repeated field (``list[UploadFile]``); every file must pass."""
     return _build(
         field,
         True,

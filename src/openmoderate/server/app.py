@@ -10,7 +10,7 @@ Endpoints:
 * ``POST /v1/moderate/batch``    multipart upload, field ``files`` (repeatable)
 * ``POST /v1/moderate/json``     JSON ``{"image_base64": ...}`` or ``{"url": ...}``
 
-Configuration comes from environment variables (see :class:`ServerSettings`).
+Configuration comes from environment variables (see `ServerSettings`).
 """
 
 from __future__ import annotations
@@ -185,10 +185,11 @@ def create_app(
             except UnsafeURLError as exc:
                 raise HTTPException(422, str(exc)) from exc
             return analyze([data], [body.url])[0]
-        if len(body.image_base64) > settings.max_bytes * 4 // 3 + 4:
+        encoded = body.image_base64 or ""  # non-None: exactly one field was checked above
+        if len(encoded) > settings.max_bytes * 4 // 3 + 4:
             raise HTTPException(413, f"Image exceeds {settings.max_bytes} bytes")
         try:
-            data = base64.b64decode(body.image_base64, validate=True)
+            data = base64.b64decode(encoded, validate=True)
         except (binascii.Error, ValueError) as exc:
             raise HTTPException(422, "image_base64 is not valid base64") from exc
         return analyze([data], [None])[0]

@@ -50,6 +50,9 @@ jobs:
           test "$(curl -s -o /dev/null -w '%{http_code}' -F file=@blue.png localhost:8000/v1/moderate)" = 401
           curl -sf -H 'X-API-Key: ci-key' -F file=@blue.png localhost:8000/v1/moderate | tee out.json
           grep '"is_safe":true' out.json
+          # Video support is installed: a non-video upload is rejected as unreadable (422),
+          # whereas a missing OpenCV would give 501.
+          test "$(curl -s -o /dev/null -w '%{http_code}' -H 'X-API-Key: ci-key' -F file=@blue.png localhost:8000/v1/moderate/video)" = 422
       - name: Container logs
         if: always()
         run: docker logs om || true

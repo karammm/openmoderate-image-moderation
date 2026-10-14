@@ -8,6 +8,7 @@ import urllib.request
 from pathlib import Path
 from typing import IO, Union
 
+import numpy as np
 from PIL import Image, ImageOps
 
 ImageInput = Union[str, os.PathLike, bytes, bytearray, IO[bytes], Image.Image]
@@ -72,6 +73,32 @@ def load_image(source: ImageInput) -> Image.Image:
         raise
     except Exception as exc:  # PIL raises many exception types
         raise ImageLoadError(f"Could not load image: {exc}") from exc
+
+
+def trim_borders(img: Image.Image, tolerance: int = 20, min_content: float = 0.2) -> Image.Image:
+    """Crop uniform borders (letterbox/pillarbox bars, padding) around the content.
+
+    Bars change what CLIP "sees": on our test video, black letterbox bars pushed a pistol
+    frame's ``sexual_activity`` score from 0.01 to 0.65. The background colour is taken
+    from the corners; nothing is cropped if the content would be under ``min_content`` of
+    the frame (e.g. a mostly uniform image), so this can only zoom in on real content.
+    """
+    gray = np.asarray(img.convert("L"), dtype=np.int16)
+    h, w = gray.shape
+    if h < 8 or w < 8:
+        return img
+    background = np.median([gray[0, 0], gray[0, -1], gray[-1, 0], gray[-1, -1]])
+    content = np.abs(gray - background) > tolerance
+    rows = np.flatnonzero(content.mean(axis=1) > 0.02)
+    cols = np.flatnonzero(content.mean(axis=0) > 0.02)
+    if not len(rows) or not len(cols):
+        return img
+    left, top, right, bottom = cols[0], rows[0], cols[-1] + 1, rows[-1] + 1
+    if (right - left) * (bottom - top) < min_content * w * h:
+        return img
+    if (left, top, right, bottom) == (0, 0, w, h):
+        return img
+    return img.crop((int(left), int(top), int(right), int(bottom)))
 
 
 def describe_source(source: ImageInput) -> str | None:

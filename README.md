@@ -25,6 +25,13 @@ pip install openmoderate
 
 Requires Python 3.9+. The first call downloads the CLIP model weights (~600 MB) and caches them; after that everything runs offline. CPU works fine; CUDA and Apple Silicon (MPS) are used automatically when available.
 
+On a CPU-only Linux server you can save ~2 GB by installing the CPU build of PyTorch first. Install `torch` and `torchvision` **together** from the same index, otherwise their versions won't match:
+
+```bash
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+pip install openmoderate
+```
+
 ## How it works
 
 openmoderate uses [OpenCLIP](https://github.com/mlfoundations/open_clip), a vision-language model that understands images and text in the same embedding space. Each moderation category is described by a few natural-language prompts (e.g. *"a photo of a gun"*). An image is flagged for a category when it matches that category's prompts clearly better than a pool of ordinary "safe" prompts (portraits, food, landscapes, national flags, logos, kitchen knives...).

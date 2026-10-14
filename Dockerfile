@@ -15,8 +15,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# CPU-only torch keeps the image ~4x smaller than the default CUDA build.
-RUN pip install torch --index-url https://download.pytorch.org/whl/cpu
+# CPU-only torch keeps the image ~4x smaller than the default CUDA build. torch and
+# torchvision must come from the same index, or their versions mismatch at import time.
+RUN pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
 
 COPY pyproject.toml README.md LICENSE ./
 COPY src ./src

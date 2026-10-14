@@ -51,7 +51,7 @@ def test_bad_and_empty_upload(fake_engine):
 
 
 def test_upload_too_large(fake_engine):
-    c = client(fake_engine, max_bytes=100)
+    c = client(fake_engine, max_bytes=10)
     r = c.post("/v1/moderate", files={"file": ("big.png", png(RED))})
     assert r.status_code == 413
 

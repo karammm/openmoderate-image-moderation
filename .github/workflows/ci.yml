@@ -20,8 +20,10 @@ jobs:
       - name: Install (CPU-only torch)
         run: |
           python -m pip install --upgrade pip
-          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
           pip install -e ".[dev]" pytest-github-actions-annotate-failures
+      - name: Check the model stack imports (catches torch/torchvision mismatches)
+        run: python -c "import open_clip, torchvision; print(open_clip.__version__, torchvision.__version__)"
       - run: ruff check src tests
       - run: ruff format --check src tests
       - run: pytest -q

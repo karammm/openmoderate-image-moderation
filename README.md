@@ -1,5 +1,12 @@
 # openmoderate
 
+[![CI](https://github.com/karammm/openmoderate-image-moderation/actions/workflows/ci.yml/badge.svg)](https://github.com/karammm/openmoderate-image-moderation/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/openmoderate?color=blue)](https://pypi.org/project/openmoderate/)
+[![Python](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue)](https://pypi.org/project/openmoderate/)
+[![Docs](https://img.shields.io/badge/docs-online-blue)](https://karammm.github.io/openmoderate-image-moderation/)
+[![Docker](https://img.shields.io/badge/docker-ghcr.io%2Fkarammm%2Fopenmoderate-blue)](https://github.com/karammm/openmoderate-image-moderation/pkgs/container/openmoderate)
+[![License](https://img.shields.io/github/license/karammm/openmoderate-image-moderation)](LICENSE)
+
 **Open-source, self-hosted image and video content moderation for Python.** Detect nudity, sexual content, violence, gore, weapons, hate symbols, drugs, self-harm, alcohol and tobacco in uploaded images and videos — with one `pip install`, no cloud account, no per-image fees, and no ML experience needed.
 
 Think of it as an open alternative to Amazon Rekognition's `DetectModerationLabels` that runs inside your own app.
@@ -68,7 +75,7 @@ avatar = models.ImageField(validators=[ModerationValidator()])      # Django
 **Call it over HTTP from any language** — REST server and Docker image ([guide](https://karammm.github.io/openmoderate-image-moderation/guide/server/)):
 
 ```bash
-docker run -p 8000:8000 -e OPENMODERATE_API_KEY=change-me openmoderate
+docker run -p 8000:8000 -e OPENMODERATE_API_KEY=change-me ghcr.io/karammm/openmoderate
 curl -H "X-API-Key: change-me" -F file=@upload.jpg localhost:8000/v1/moderate
 ```
 

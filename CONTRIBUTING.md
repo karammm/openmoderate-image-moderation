@@ -42,15 +42,10 @@ PyPI. The `Docker image` workflow smoke-tests the server image and publishes it 
 
 ### One-time setup
 
-**PyPI publishing** (until this is done, releases go to GitHub only):
-
-1. Create an account on [pypi.org](https://pypi.org/account/register/) and enable 2FA.
-2. Go to *Your account → Publishing → Add a new pending publisher* and enter:
-   PyPI project name `openmoderate`, owner `karammm`, repository
-   `openmoderate-image-moderation`, workflow `release.yml`, environment `pypi`.
-3. In the GitHub repo, *Settings → Secrets and variables → Actions → Variables*, add
-   `PYPI_PUBLISH` = `true`.
-4. Publish by re-running the `Release` workflow for the latest tag, or with the next tag.
+**PyPI publishing** uses [trusted publishing](https://docs.pypi.org/trusted-publishers/):
+the `openmoderate` project on PyPI trusts the `release.yml` workflow of this repository
+(environment `pypi`), so no API token is stored anywhere. To move the project, update the
+publisher under the project's *Settings → Publishing* on PyPI.
 
 **Docs site:** in the GitHub repo, *Settings → Pages → Build and deployment → Source*,
 choose **GitHub Actions**, then add the repository variable `DOCS_DEPLOY` = `true`. The

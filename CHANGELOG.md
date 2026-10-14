@@ -4,6 +4,10 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-10-14
+
+First release on PyPI: `pip install openmoderate`.
+
 ### Added
 - Docker image published to `ghcr.io/karammm/openmoderate` on every release, smoke-tested
   before it is pushed.
@@ -14,6 +18,7 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Changed
 - GitHub Actions updated to their current major versions.
+- Releases publish to PyPI through trusted publishing on every version tag.
 
 ## [1.0.0] - 2026-10-14
 

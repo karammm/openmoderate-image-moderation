@@ -5,14 +5,14 @@
 [![Python](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue)](https://pypi.org/project/openmoderate/)
 [![Docs](https://img.shields.io/badge/docs-online-blue)](https://karammm.github.io/openmoderate-image-moderation/)
 [![Docker](https://img.shields.io/badge/docker-ghcr.io%2Fkarammm%2Fopenmoderate-blue)](https://github.com/karammm/openmoderate-image-moderation/pkgs/container/openmoderate)
-[![License](https://img.shields.io/github/license/karammm/openmoderate-image-moderation)](LICENSE)
+[![License](https://img.shields.io/github/license/karammm/openmoderate-image-moderation)](https://github.com/karammm/openmoderate-image-moderation/blob/main/LICENSE)
 
 **Open-source, self-hosted image and video content moderation for Python.** Detect nudity, sexual content, violence, gore, weapons, hate symbols, drugs, self-harm, alcohol and tobacco in uploaded images and videos — with one `pip install`, no cloud account, no per-image fees, and no ML experience needed.
 
 Think of it as an open alternative to Amazon Rekognition's `DetectModerationLabels` that runs inside your own app.
 
 <p align="center">
-  <img src="docs/assets/demo.svg" alt="Terminal demo: openmoderate scans a folder, flagging a pistol (weapons 100%), a riot (violence 99%) and a swastika (hate_symbols 100%) while a beach, a dog and a US flag pass as safe; then the REST server flags a cigarette photo as tobacco (0.96)." width="820">
+  <img src="https://raw.githubusercontent.com/karammm/openmoderate-image-moderation/main/docs/assets/demo.svg" alt="Terminal demo: openmoderate scans a folder, flagging a pistol (weapons 100%), a riot (violence 99%) and a swastika (hate_symbols 100%) while a beach, a dog and a US flag pass as safe; then the REST server flags a cigarette photo as tobacco (0.96)." width="820">
 </p>
 
 ```python
@@ -26,9 +26,9 @@ if not result.is_safe:
     # [Label(name='weapons', confidence=0.9612, parent='violence', threshold=0.5)]
 ```
 
-![How openmoderate works: upload, normalize, embed with CLIP, compare against category and safe prompts, score, and decide with your thresholds. Use it as a Python library, a CLI or a REST API. Detects 11 categories out of the box, plus your own.](docs/assets/how-it-works.svg)
+![How openmoderate works: upload, normalize, embed with CLIP, compare against category and safe prompts, score, and decide with your thresholds. Use it as a Python library, a CLI or a REST API. Detects 11 categories out of the box, plus your own.](https://raw.githubusercontent.com/karammm/openmoderate-image-moderation/main/docs/assets/how-it-works.svg)
 
-[**Documentation**](https://karammm.github.io/openmoderate-image-moderation/) · [Benchmarks](benchmark/RESULTS.md) · [Changelog](CHANGELOG.md) · [Security](SECURITY.md)
+[**Documentation**](https://karammm.github.io/openmoderate-image-moderation/) · [Benchmarks](https://github.com/karammm/openmoderate-image-moderation/blob/main/benchmark/RESULTS.md) · [Changelog](https://github.com/karammm/openmoderate-image-moderation/blob/main/CHANGELOG.md) · [Security](https://github.com/karammm/openmoderate-image-moderation/blob/main/SECURITY.md)
 
 ## Install
 
@@ -98,7 +98,7 @@ Zero-shot moderation is good at clear-cut cases and will miss subtle ones. Evalu
 
 ## Contributing
 
-Contributions are welcome — better prompts, new categories, benchmark images and bug reports especially. See [CONTRIBUTING.md](CONTRIBUTING.md). Report security issues privately ([SECURITY.md](SECURITY.md)).
+Contributions are welcome — better prompts, new categories, benchmark images and bug reports especially. See [CONTRIBUTING.md](https://github.com/karammm/openmoderate-image-moderation/blob/main/CONTRIBUTING.md). Report security issues privately ([SECURITY.md](https://github.com/karammm/openmoderate-image-moderation/blob/main/SECURITY.md)).
 
 ## Responsible use
 
@@ -106,4 +106,4 @@ openmoderate is meant to help keep platforms safe. Do not use it to surveil indi
 
 ## License
 
-[Apache 2.0](LICENSE). Benchmark images keep their own licences (see [`benchmark/manifest.csv`](benchmark/manifest.csv)).
+[Apache 2.0](https://github.com/karammm/openmoderate-image-moderation/blob/main/LICENSE). Benchmark images keep their own licences (see [`benchmark/manifest.csv`](https://github.com/karammm/openmoderate-image-moderation/blob/main/benchmark/manifest.csv)).

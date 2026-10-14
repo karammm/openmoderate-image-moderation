@@ -5,8 +5,7 @@ name: Release
 #   2. build the sdist and wheel,
 #   3. create the GitHub release with notes from CHANGELOG.md (and backfill release pages
 #      for any older tags that lack one),
-#   4. publish to PyPI, once the repository variable PYPI_PUBLISH is set to "true" and
-#      PyPI trusted publishing is configured (see CONTRIBUTING.md).
+#   4. publish to PyPI through trusted publishing (no tokens stored in the repository).
 
 on:
   push:
@@ -73,7 +72,6 @@ jobs:
 
   pypi:
     needs: build
-    if: vars.PYPI_PUBLISH == 'true'
     runs-on: ubuntu-latest
     environment: pypi
     permissions:

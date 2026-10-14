@@ -4,8 +4,11 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-10-14
+
 ### Added
 - Python 3.13 and 3.14 are tested in CI and listed as supported.
+- Unit tests for image loading (`openmoderate.io`): input types, transparency handling, size limits and file discovery.
 
 ## [1.0.1] - 2026-10-14
 

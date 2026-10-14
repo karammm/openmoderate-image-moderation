@@ -21,7 +21,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install torch --index-url https://download.pytorch.org/whl/cpu
-          pip install -e ".[dev]"
+          pip install -e ".[dev]" pytest-github-actions-annotate-failures
       - run: ruff check src tests
       - run: ruff format --check src tests
       - run: pytest -q
@@ -32,7 +32,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build image
-        run: docker build -t openmoderate:ci .
+        run: |
+          set -o pipefail
+          if ! docker build --progress=plain -t openmoderate:ci . 2>&1 | tee build.log; then
+            msg=$(tail -c 4000 build.log | python3 -c "import sys; print(sys.stdin.read().replace('%','%25').replace('\\r','').replace('\\n','%0A'))")
+            echo "::error title=docker build failed::$msg"
+            exit 1
+          fi
       - name: Smoke test the container
         run: |
           docker run -d --name om -p 8000:8000 -e OPENMODERATE_API_KEY=ci-key openmoderate:ci

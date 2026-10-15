@@ -4,6 +4,15 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-10-15
+
+### Changed
+- README explains the machine-learning model (CLIP, the zero-shot scoring pipeline, supervised
+  fine-tuning, model sizes and speeds) and shows the full accuracy results: per-category recall
+  and false-positive rate for every preset, cross-validated recall, method and limits.
+- Commit history is attributed to the project owner only.
+- No code changes: scores and behaviour are identical to 1.1.0.
+
 ## [1.1.0] - 2026-10-14
 
 ### Added

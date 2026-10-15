@@ -31,7 +31,7 @@ mod = Moderator(preset="accurate")   # "fast" (default), "balanced" or "accurate
 
 | Preset | Model | Recall | Safe images flagged | CPU per image |
 |---|---|---:|---:|---:|
-| `fast` | ViT-B/32 | 77% | 6.5% | 10 ms |
+| `fast` | ViT-B/32 | 77.5% | 6.5% | 10 ms |
 | `balanced` | ViT-B/16 | 77% | 4.7% | 32 ms |
 | `accurate` | ViT-L/14 | 82% | 4.2% | 129 ms |
 

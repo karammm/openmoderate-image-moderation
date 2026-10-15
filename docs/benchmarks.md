@@ -27,7 +27,7 @@ a larger CLIP model. Measured on all 475 benchmark images:
 
 | Preset | Model | Size | Recall (avg) | Safe images flagged | Cross-validated recall | CPU | Apple GPU |
 |---|---|---:|---:|---:|---:|---:|---:|
-| `fast` (default) | ViT-B/32 | ~600 MB | 77% | 6.5% | 73.5% | 10 ms | 6 ms |
+| `fast` (default) | ViT-B/32 | ~600 MB | 77.5% | 6.5% | 73.5% | 10 ms | 6 ms |
 | `balanced` | ViT-B/16 | ~600 MB | 77% | 4.7% | 79.5% | 32 ms | 16 ms |
 | `accurate` | ViT-L/14 | ~1.7 GB | **82%** | **4.2%** | **82.4%** | 129 ms | 68 ms |
 

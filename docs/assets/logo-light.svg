@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="120" viewBox="0 0 600 120" role="img" aria-label="openmoderate">
+  <title>openmoderate</title>
+  <!-- Mark: a photo frame (image) with a shield and check (moderation) -->
+  <g transform="translate(8 14)">
+    <rect x="2" y="2" width="78" height="66" rx="12" fill="#ddf4ff" stroke="#0969da" stroke-width="4"/>
+    <circle cx="25" cy="23" r="7" fill="#0969da"/>
+    <path d="M8 60 L30 38 L44 50 L56 40 L74 58 L74 62 Q74 64 72 64 L10 64 Q8 64 8 62 Z" fill="#0969da" opacity="0.55"/>
+    <path d="M66 46 L90 54 L90 70 Q90 86 66 94 Q42 86 42 70 L42 54 Z" fill="#0969da" stroke="#ffffff" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M55 70 L63 78 L78 62" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="124" y="78" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="56" letter-spacing="-1">
+    <tspan fill="#59636e" font-weight="400">open</tspan><tspan fill="#1f2328" font-weight="700">moderate</tspan>
+  </text>
+</svg>

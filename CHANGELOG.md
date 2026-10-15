@@ -4,6 +4,14 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [1.1.2] - 2026-10-15
+
+### Changed
+- Redesigned README: logo for light and dark themes, quick start, "Why openmoderate", an install
+  table, collapsible usage examples for every interface, the machine-learning model, the full
+  accuracy table, quality checks and community links. It renders the same on GitHub and PyPI.
+- No code changes: scores and behaviour are identical to 1.1.1.
+
 ## [1.1.1] - 2026-10-15
 
 ### Changed

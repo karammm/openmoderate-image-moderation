@@ -23,7 +23,7 @@ from openmoderate.result import Label, ModerationResult
 from openmoderate.training.head import LinearHead
 from openmoderate.video import VideoLoadError, VideoModerationResult, VideoSegment
 
-__version__ = "1.1.2"
+__version__ = "1.1.3"
 
 __all__ = [
     "DEFAULT_CATEGORIES",

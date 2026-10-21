@@ -4,6 +4,12 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [1.1.3] - 2026-10-21
+
+### Added
+- Tests for `trim_borders` edge cases, EXIF orientation handling and loading images from URLs
+  (including the size limit). No code changes: scores and behaviour are identical to 1.1.2.
+
 ## [1.1.2] - 2026-10-15
 
 ### Changed

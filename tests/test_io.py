@@ -78,3 +78,44 @@ def test_iter_image_files(tmp_path):
     assert names == ["b.JPG", "a.png"]
     single = tmp_path / "notes.txt"
     assert iter_image_files(single) == [single]
+
+
+def test_trim_borders_leaves_tiny_uniform_and_borderless_images_alone():
+    tiny = Image.new("RGB", (6, 6), (0, 0, 0))
+    assert omio.trim_borders(tiny) is tiny
+    uniform = Image.new("RGB", (40, 40), (0, 0, 0))
+    assert omio.trim_borders(uniform) is uniform
+    noisy = Image.effect_noise((40, 40), 80).convert("RGB")
+    assert omio.trim_borders(noisy).size == (40, 40)
+
+
+def test_trim_borders_keeps_image_when_content_is_too_small():
+    img = Image.new("RGB", (100, 100), (0, 0, 0))
+    img.paste((255, 255, 255), (45, 45, 55, 55))
+    assert omio.trim_borders(img) is img
+
+
+def test_load_image_applies_exif_orientation():
+    img = Image.new("RGB", (8, 4), (10, 20, 30))
+    exif = Image.Exif()
+    exif[0x0112] = 6  # rotate 90 degrees clockwise to display
+    buf = io.BytesIO()
+    img.save(buf, format="JPEG", exif=exif)
+    assert load_image(buf.getvalue()).size == (4, 8)
+
+
+def test_load_image_from_url_and_url_size_limit(monkeypatch):
+    data = _png_bytes()
+
+    class _Response(io.BytesIO):
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            self.close()
+
+    monkeypatch.setattr(omio.urllib.request, "urlopen", lambda req, timeout: _Response(data))
+    assert load_image("https://example.com/a.png").size == (8, 8)
+    monkeypatch.setattr(omio, "MAX_BYTES", 10)
+    with pytest.raises(ImageLoadError, match="exceeds"):
+        load_image("https://example.com/a.png")

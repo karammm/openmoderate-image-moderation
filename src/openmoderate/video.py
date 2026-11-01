@@ -253,6 +253,8 @@ def analyze_video(
     keep_frame_scores: bool = False,
 ) -> VideoModerationResult:
     """Implementation of `openmoderate.Moderator.analyze_video`."""
+    if fps <= 0:
+        raise ValueError("fps must be positive")
     specs = moderator.label_specs
     names = [s.name for s in specs]
     parents = [s.parent for s in specs]

@@ -4,6 +4,16 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [1.1.4] - 2026-11-01
+
+### Fixed
+- `Moderator.analyze_video(fps=0)` (or a negative `fps`) now raises `ValueError("fps must be positive")`
+  instead of a bare `ZeroDivisionError`.
+
+### Added
+- Tests for video edge cases: segment end clamping, `max_frames`, unsupported and oversized
+  inputs, and temporary-file cleanup.
+
 ## [1.1.3] - 2026-10-21
 
 ### Added

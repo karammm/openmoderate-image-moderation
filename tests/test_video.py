@@ -8,7 +8,7 @@ pytest.importorskip("cv2")
 
 from openmoderate import Moderator  # noqa: E402
 from openmoderate.cli import main  # noqa: E402
-from openmoderate.video import VideoLoadError, build_segments  # noqa: E402
+from openmoderate.video import VideoLoadError, build_segments, is_video_path  # noqa: E402
 
 RED, GREEN = (255, 0, 0), (0, 255, 0)
 
@@ -87,6 +87,54 @@ def test_build_segments_merges_single_missed_sample():
     segs = build_segments(times, flagged, ["x"], [None], [0.5], 1.0, 8.0)
     # Samples 1-2 and 4 merge across the one-sample gap; sample 7 is separate.
     assert [(s.start, s.end, s.frames) for s in segs] == [(1.0, 5.0, 3), (7.0, 8.0, 1)]
+
+
+def test_build_segments_end_is_clamped_to_duration():
+    times = np.array([0.0, 1.0, 2.0])
+    scores = np.array([0, 0, 1], dtype=float)[:, None]
+    (seg,) = build_segments(times, scores, ["x"], [None], [0.5], 1.0, 2.5)
+    assert (seg.start, seg.end) == (2.0, 2.5)
+
+
+def test_build_segments_nothing_flagged():
+    scores = np.zeros((3, 1))
+    assert build_segments(np.arange(3.0), scores, ["x"], [None], [0.5], 1.0, 3.0) == []
+
+
+def test_is_video_path_is_case_insensitive():
+    assert is_video_path("clip.MP4") and is_video_path("a/b/clip.webm")
+    assert not is_video_path("photo.jpg") and not is_video_path("noextension")
+
+
+def test_non_positive_fps_is_rejected(mod, tmp_path):
+    video = make_video(tmp_path / "v.mp4", [(GREEN, 1)])
+    with pytest.raises(ValueError, match="fps must be positive"):
+        mod.analyze_video(video, fps=0)
+
+
+def test_max_frames_limits_sampling(mod, tmp_path):
+    video = make_video(tmp_path / "v.mp4", [(GREEN, 5)])
+    assert mod.analyze_video(video, max_frames=2).frames_analyzed == 2
+
+
+def test_unsupported_input_type(mod):
+    with pytest.raises(VideoLoadError, match="Unsupported video input type"):
+        mod.analyze_video(12345)
+
+
+def test_oversized_bytes_are_rejected(mod, monkeypatch):
+    import openmoderate.video as video_module
+
+    monkeypatch.setattr(video_module, "MAX_VIDEO_BYTES", 10)
+    with pytest.raises(VideoLoadError, match="exceeds"):
+        mod.analyze_video(b"x" * 11)
+
+
+def test_temp_file_is_removed_after_failure(mod, tmp_path, monkeypatch):
+    monkeypatch.setattr("tempfile.tempdir", str(tmp_path))
+    with pytest.raises(VideoLoadError):
+        mod.analyze_video(b"not a video")
+    assert not list(tmp_path.glob("openmoderate-*"))
 
 
 def test_cli_scans_videos(tmp_path, capsys, monkeypatch):

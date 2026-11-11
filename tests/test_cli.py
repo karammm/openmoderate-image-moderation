@@ -56,3 +56,13 @@ def test_categories_lists_head_labels(tmp_path, capsys):
 def test_bad_threshold_arg(tmp_path):
     with pytest.raises(SystemExit):
         main(["scan", str(tmp_path), "-t", "weapons"])
+
+
+def test_non_numeric_threshold_value(tmp_path):
+    with pytest.raises(SystemExit, match="must be a number"):
+        main(["scan", str(tmp_path), "-t", "weapons=high"])
+
+
+def test_config_and_preset_are_exclusive(tmp_path):
+    with pytest.raises(SystemExit, match="either --config or --preset"):
+        main(["scan", str(tmp_path), "--config", "x.yaml", "--preset", "fast"])

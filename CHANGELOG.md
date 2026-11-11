@@ -4,6 +4,15 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [1.1.5] - 2026-11-11
+
+### Fixed
+- `--threshold NAME=VALUE` with a non-numeric value now exits with a clear message instead of a
+  `ValueError` traceback.
+
+### Added
+- CLI tests for non-numeric thresholds and the `--config`/`--preset` conflict.
+
 ## [1.1.4] - 2026-11-01
 
 ### Fixed

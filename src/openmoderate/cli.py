@@ -24,7 +24,10 @@ def _parse_thresholds(items: list[str] | None) -> dict[str, float]:
         name, sep, value = item.partition("=")
         if not sep:
             raise SystemExit(f"--threshold expects NAME=VALUE, got {item!r}")
-        out[name.strip()] = float(value)
+        try:
+            out[name.strip()] = float(value)
+        except ValueError:
+            raise SystemExit(f"--threshold value must be a number, got {item!r}") from None
     return out
 
 

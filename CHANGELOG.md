@@ -4,6 +4,12 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [1.1.6] - 2026-11-21
+
+### Added
+- CLI tests for `scan`: empty directories (warning, exit code 0), the summary line and scanning a
+  single file. No code changes: scores and behaviour are identical to 1.1.5.
+
 ## [1.1.5] - 2026-11-11
 
 ### Fixed

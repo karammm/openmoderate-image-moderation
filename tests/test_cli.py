@@ -66,3 +66,24 @@ def test_non_numeric_threshold_value(tmp_path):
 def test_config_and_preset_are_exclusive(tmp_path):
     with pytest.raises(SystemExit, match="either --config or --preset"):
         main(["scan", str(tmp_path), "--config", "x.yaml", "--preset", "fast"])
+
+
+def test_scan_empty_directory_warns_and_exits_zero(tmp_path, capsys):
+    assert main(["scan", str(tmp_path)]) == 0
+    err = capsys.readouterr().err
+    assert "no images or videos found" in err
+    assert "0 scanned, 0 flagged, 0 unreadable" in err
+
+
+def test_scan_summary_counts_safe_images(tmp_path, capsys):
+    solid((30, 200, 30)).save(tmp_path / "ok.png")
+    assert main(["scan", str(tmp_path)]) == 0
+    assert "1 scanned, 0 flagged, 0 unreadable" in capsys.readouterr().err
+
+
+def test_scan_single_file_path(tmp_path, capsys):
+    path = tmp_path / "one.png"
+    solid((30, 200, 30)).save(path)
+    assert main(["scan", str(path), "--json"]) == 0
+    line = json.loads(capsys.readouterr().out.splitlines()[0])
+    assert line["source"].endswith("one.png") and line["is_safe"] is True

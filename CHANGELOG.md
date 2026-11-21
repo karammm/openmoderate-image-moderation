@@ -10,6 +10,10 @@ All notable changes to this project are documented here. The format follows [Kee
 - CLI tests for `scan`: empty directories (warning, exit code 0), the summary line and scanning a
   single file. No code changes: scores and behaviour are identical to 1.1.5.
 
+### Fixed
+- CI test matrix pinned to `ubuntu-24.04` because `ubuntu-latest` (26.04) no longer provides
+  Python 3.9.
+
 ## [1.1.5] - 2026-11-11
 
 ### Fixed
